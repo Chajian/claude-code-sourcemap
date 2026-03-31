@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Claude Code 教学页：从用户输入到输出结果的数据流</title>
+  <style>
+    :root {
+      --bg: #f4efe6;
+      --panel: rgba(255, 251, 245, 0.9);
+      --panel-strong: #fffdf9;
+      --line: #d8cbbb;
+      --ink: #1f2a30;
+      --muted: #6f746f;
+      --accent: #0e7490;
+      --accent-soft: rgba(14, 116, 144, 0.14);
+      --accent-2: #dc6b2f;
+      --success: #2f855a;
+      --warning: #b7791f;
+      --shadow: 0 18px 44px rgba(47, 36, 22, 0.12);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(14, 116, 144, 0.08), transparent 26%),
+        radial-gradient(circle at top right, rgba(220, 107, 47, 0.12), transparent 28%),
+        linear-gradient(180deg, #fcf8f2 0%, var(--bg) 62%, #efe6da 100%);
+      min-height: 100vh;
+    }
+
+    .page {
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 28px 22px 44px;
+    }
+
+    .hero, .card {
+      background: var(--panel);
+      border: 1px solid rgba(216, 203, 187, 0.85);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+
+    .hero {
+      padding: 28px 30px 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -60px;
+      top: -60px;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(14, 116, 144, 0.18), transparent 65%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: rgba(31, 42, 48, 0.06);
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 13px;
+      letter-spacing: 0.04em;
+    }
+
+    h1 {
+      margin: 16px 0 12px;
+      font-size: clamp(32px, 5vw, 54px);
+      line-height: 1.06;
+      letter-spacing: -0.03em;
+    }
+
+    .hero p {
+      max-width: 920px;
+      font-size: 16px;
+      line-height: 1.75;
+      color: #354047;
+      margin: 0;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.35fr 0.95fr;
+      gap: 14px;
+      margin-top: 22px;
+    }
+
+    .mini-panel, .summary-item, .detail, .big-stage, .timeline-item, .note {
+      border-radius: 18px;
+      border: 1px solid rgba(216, 203, 187, 0.72);
+    }
+
+    .mini-panel {
+      padding: 16px 18px;
+      background: rgba(255, 255, 255, 0.62);
+    }
+
+    .mini-title {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .mini-panel strong {
+      display: block;
+      font-size: 19px;
+      margin-bottom: 8px;
+    }
+
+    .summary-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .summary-item {
+      padding: 12px 14px;
+      min-height: 96px;
+      background: rgba(14, 116, 144, 0.08);
+      border-color: rgba(14, 116, 144, 0.1);
+    }
+
+    .summary-item:nth-child(2n) {
+      background: rgba(220, 107, 47, 0.08);
+      border-color: rgba(220, 107, 47, 0.12);
+    }
+
+    .summary-item h3 {
+      margin: 0 0 6px;
+      font-size: 14px;
+    }
+
+    .summary-item p {
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #4d575d;
+    }
+
+    .toolbar {
+      margin-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      border-radius: 999px;
+      padding: 11px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    }
+
+    button:hover { transform: translateY(-1px); }
+
+    .primary-btn {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 10px 24px rgba(14, 116, 144, 0.24);
+    }
+
+    .secondary-btn {
+      background: #fff;
+      color: var(--ink);
+      border: 1px solid rgba(216, 203, 187, 0.95);
+    }
+
+    .speed {
+      display: inline-flex;
+      padding: 4px;
+      border-radius: 999px;
+      background: rgba(31, 42, 48, 0.06);
+      gap: 4px;
+    }
+
+    .speed button {
+      padding: 8px 12px;
+      font-size: 13px;
+      background: transparent;
+      color: var(--muted);
+      box-shadow: none;
+    }
+
+    .speed button.active {
+      background: #fff;
+      color: var(--ink);
+      box-shadow: 0 6px 14px rgba(31, 42, 48, 0.08);
+    }
+
+    .progress-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 260px;
+    }
+
+    .progress-bar {
+      flex: 1;
+      height: 10px;
+      background: rgba(31, 42, 48, 0.08);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-bar span {
+      display: block;
+      width: 0;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      border-radius: inherit;
+      transition: width 320ms ease;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(340px, 0.95fr);
+      gap: 18px;
+      margin-top: 20px;
+    }
+
+    .flow-card, .info-card, .footer-card { padding: 22px; }
+
+    .flow-head, .info-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: end;
+      margin-bottom: 18px;
+    }
+
+    .flow-head h2, .info-head h2, .footer-card h2 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .flow-head p, .info-head p, .footer-card p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(31, 42, 48, 0.05);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .legend i {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .flow-grid {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(8, minmax(130px, 1fr));
+      gap: 12px;
+      align-items: stretch;
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+
+    .flow-grid::before {
+      content: "";
+      position: absolute;
+      left: 60px;
+      right: 60px;
+      top: 50%;
+      height: 4px;
+      background: repeating-linear-gradient(90deg, rgba(31, 42, 48, 0.18) 0 22px, transparent 22px 32px);
+      transform: translateY(-50%);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .step {
+      position: relative;
+      z-index: 1;
+      min-height: 260px;
+      padding: 18px 14px 16px;
+      border-radius: 20px;
+      border: 1px solid rgba(216, 203, 187, 0.88);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(247, 240, 231, 0.9));
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease, background 220ms ease;
+    }
+
+    .step.active {
+      transform: translateY(-6px);
+      border-color: rgba(14, 116, 144, 0.42);
+      background: linear-gradient(180deg, rgba(239, 251, 255, 0.98), rgba(226, 245, 250, 0.95));
+      box-shadow: 0 18px 32px rgba(14, 116, 144, 0.14);
+    }
+
+    .step.done {
+      border-color: rgba(47, 133, 90, 0.26);
+      background: linear-gradient(180deg, rgba(244, 252, 247, 0.95), rgba(237, 248, 240, 0.92));
+    }
+
+    .step.upcoming { opacity: 0.66; }
+
+    .step-num {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+      font-weight: 700;
+      background: rgba(31, 42, 48, 0.08);
+      color: var(--ink);
+    }
+
+    .step.active .step-num { background: var(--accent); color: #fff; }
+    .step.done .step-num { background: var(--success); color: #fff; }
+
+    .step h3 { margin: 0; font-size: 18px; line-height: 1.35; }
+
+    .step .module {
+      display: inline-flex;
+      align-self: flex-start;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      color: var(--muted);
+      background: rgba(31, 42, 48, 0.06);
+    }
+
+    .step p {
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.7;
+      color: #48545a;
+    }
+
+    .token-chip {
+      margin-top: auto;
+      padding: 10px 12px;
+      border-radius: 14px;
+      font-size: 12px;
+      line-height: 1.6;
+      background: rgba(220, 107, 47, 0.08);
+      border: 1px solid rgba(220, 107, 47, 0.14);
+      color: #7a4929;
+    }
+
+    .info-card {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .big-stage {
+      padding: 18px;
+      background: linear-gradient(135deg, rgba(14, 116, 144, 0.12), rgba(220, 107, 47, 0.08));
+    }
+
+    .big-stage .stage-index {
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .big-stage h3 {
+      margin: 10px 0 8px;
+      font-size: 26px;
+      line-height: 1.2;
+    }
+
+    .big-stage p {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.8;
+      color: #37454b;
+    }
+
+    .detail-grid, .token-meter, .timeline, .notes {
+      display: grid;
+      gap: 12px;
+    }
+
+    .detail {
+      padding: 16px 16px 14px;
+      background: var(--panel-strong);
+    }
+
+    .detail h4 {
+      margin: 0 0 8px;
+      font-size: 14px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .detail p, .detail ul {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.75;
+      color: #334047;
+    }
+
+    .detail ul { padding-left: 18px; }
+    .detail li + li { margin-top: 6px; }
+
+    .code-ref-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .code-ref {
+      display: inline-flex;
+      align-items: center;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(31, 42, 48, 0.05);
+      color: #344248;
+      font-size: 12px;
+      text-decoration: none;
+      border: 1px solid rgba(216, 203, 187, 0.72);
+    }
+
+    .meter-row {
+      display: grid;
+      grid-template-columns: 88px 1fr auto;
+      gap: 10px;
+      align-items: center;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .meter {
+      height: 10px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(31, 42, 48, 0.08);
+    }
+
+    .meter span {
+      display: block;
+      height: 100%;
+      width: 0;
+      border-radius: inherit;
+      transition: width 340ms ease;
+    }
+
+    .input-meter span { background: linear-gradient(90deg, #0e7490, #2aa7c8); }
+    .tool-meter span { background: linear-gradient(90deg, #d97706, #f59e0b); }
+    .output-meter span { background: linear-gradient(90deg, #15803d, #4ade80); }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 88px 1fr;
+      gap: 12px;
+      align-items: start;
+      padding: 12px 14px;
+      background: rgba(31, 42, 48, 0.04);
+    }
+
+    .timeline-item strong { color: var(--accent); }
+
+    .timeline-item p {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.7;
+      color: #39464c;
+    }
+
+    .note {
+      padding: 14px 16px;
+      border-left: 4px solid var(--accent-2);
+      background: rgba(220, 107, 47, 0.08);
+      color: #553626;
+      font-size: 14px;
+      line-height: 1.75;
+    }
+
+    .kbd {
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 8px;
+      background: rgba(31, 42, 48, 0.08);
+      border: 1px solid rgba(31, 42, 48, 0.12);
+      font-size: 12px;
+      color: var(--ink);
+    }
+
+    @media (max-width: 1180px) {
+      .hero-grid, .layout, .footer-grid { grid-template-columns: 1fr; }
+      .legend { justify-content: flex-start; }
+    }
+
+    @media (max-width: 720px) {
+      .page { padding: 16px 12px 28px; }
+      .hero, .flow-card, .info-card, .footer-card { padding: 18px; }
+      .summary-list { grid-template-columns: 1fr; }
+      .toolbar { align-items: flex-start; }
+      .progress-wrap { width: 100%; }
+      .flow-grid { grid-template-columns: repeat(8, minmax(190px, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="hero">
+      <div class="eyebrow">Claude Code 学习页 · 用户输入到输出结果的完整数据流</div>
+      <h1>从用户发起 prompt / token，到终端渲染结果，中间到底发生了什么？</h1>
+      <p>
+        这个页面把当前仓库里的核心运行主线压成一条可视化教学链路。重点不是列所有模块，而是帮助开发者建立一张稳定心智图：
+        用户输入进入 REPL 之后，如何被分流、入队、交给 Query 主循环，什么时候触发工具执行，哪些内容会被写入会话日志，以及最终为什么会在终端看到流式结果。
+      </p>
+      <div class="hero-grid">
+        <div class="mini-panel">
+          <div class="mini-title">核心观察</div>
+          <strong>这是一条可恢复、可持久化、可插工具的长链路，不是一次简单的 API 调用。</strong>
+          <p>
+            从 `REPL.tsx` 的输入提交，到 `handlePromptSubmit` 的预处理，再到 `query.ts` 的循环采样和 `toolOrchestration.ts`
+            的工具执行，最后通过 `sessionStorage.ts` 与终端消息列表汇合，这条链路同时在处理控制流、消息流和 token 预算。
+          </p>
+        </div>
+        <div class="summary-list">
+          <div class="summary-item">
+            <h3>输入不会直接发 API</h3>
+            <p>先经过输入模式识别、引用展开、队列调度和 query guard。</p>
+          </div>
+          <div class="summary-item">
+            <h3>Query 是核心引擎</h3>
+            <p>真正负责消息规范化、采样、工具回路、compact 与 stop hooks。</p>
+          </div>
+          <div class="summary-item">
+            <h3>工具执行是回路</h3>
+            <p>模型返回 `tool_use`，本地执行后再以 `tool_result` 回灌给模型。</p>
+          </div>
+          <div class="summary-item">
+            <h3>输出不只显示在屏幕上</h3>
+            <p>会话日志、恢复信息、工具结果存储和 REPL 渲染会同步更新。</p>
+          </div>
+        </div>
+      </div>
+      <div class="toolbar">
+        <div class="controls">
+          <button id="prevBtn" class="secondary-btn">上一步</button>
+          <button id="playBtn" class="primary-btn">自动播放</button>
+          <button id="nextBtn" class="secondary-btn">下一步</button>
+          <button id="resetBtn" class="secondary-btn">重置</button>
+          <div class="speed">
+            <button data-speed="2800" class="active">慢速</button>
+            <button data-speed="1800">标准</button>
+            <button data-speed="1000">快速</button>
+          </div>
+        </div>
+        <div class="progress-wrap">
+          <span id="progressText">阶段 1 / 8</span>
+          <div class="progress-bar"><span id="progressBar"></span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="layout">
+      <article class="card flow-card">
+        <div class="flow-head">
+          <div>
+            <h2>主链路数据流</h2>
+            <p>按 <span class="kbd">空格</span> 自动播放，按 <span class="kbd">←</span> / <span class="kbd">→</span> 切换阶段。</p>
+          </div>
+          <div class="legend">
+            <span><i style="background:#0e7490"></i>当前高亮</span>
+            <span><i style="background:#2f855a"></i>已经经过</span>
+            <span><i style="background:#b9b1a5"></i>尚未到达</span>
+          </div>
+        </div>
+        <div id="flowGrid" class="flow-grid"></div>
+      </article>
+
+      <aside class="card info-card">
+        <div class="info-head">
+          <div>
+            <h2>阶段解读</h2>
+            <p>右侧内容会跟随当前阶段变化，强调输入形态、关键模块、状态变化与 token 视角。</p>
+          </div>
+        </div>
+        <section class="big-stage">
+          <div id="stageIndex" class="stage-index">阶段 1</div>
+          <h3 id="stageTitle">加载中</h3>
+          <p id="stageSummary"></p>
+        </section>
+        <div class="detail-grid">
+          <section class="detail">
+            <h4>输入与输出</h4>
+            <p id="ioText"></p>
+          </section>
+          <section class="detail">
+            <h4>关键模块</h4>
+            <p id="moduleText"></p>
+            <div id="codeRefs" class="code-ref-list"></div>
+          </section>
+          <section class="detail">
+            <h4>状态变化</h4>
+            <ul id="stateList"></ul>
+          </section>
+          <section class="detail">
+            <h4>Token 视角</h4>
+            <div class="token-meter">
+              <div class="meter-row">
+                <span>输入 token</span>
+                <div class="meter input-meter"><span id="inputMeter"></span></div>
+                <strong id="inputMeterText">0%</strong>
+              </div>
+              <div class="meter-row">
+                <span>工具上下文</span>
+                <div class="meter tool-meter"><span id="toolMeter"></span></div>
+                <strong id="toolMeterText">0%</strong>
+              </div>
+              <div class="meter-row">
+                <span>输出 token</span>
+                <div class="meter output-meter"><span id="outputMeter"></span></div>
+                <strong id="outputMeterText">0%</strong>
+              </div>
+            </div>
+            <p id="tokenText" style="margin-top:12px;"></p>
+          </section>
+        </div>
+      </aside>
+    </section>
+
+    <section class="footer-grid">
+      <article class="card footer-card">
+        <h2>把源码读成一条时间线</h2>
+        <p>先沿主干走，再按需向队列、工具、持久化这些侧边能力展开。</p>
+        <div class="timeline">
+          <div class="timeline-item">
+            <strong>提交前</strong>
+            <p>用户在 `PromptInput` 中输入文本，REPL 仍然处于本地交互阶段，尚未进入模型采样。</p>
+          </div>
+          <div class="timeline-item">
+            <strong>提交瞬间</strong>
+            <p>`handlePromptSubmit` 整理消息、引用、模式、队列 reservation，并决定是直接执行还是先入队。</p>
+          </div>
+          <div class="timeline-item">
+            <strong>执行阶段</strong>
+            <p>`query.ts` 进入循环：准备 API 消息、流式接收 assistant 事件、必要时调用工具，再把 `tool_result` 写回消息链。</p>
+          </div>
+          <div class="timeline-item">
+            <strong>收尾阶段</strong>
+            <p>`sessionStorage.ts` 落盘 transcript，REPL 列表更新，恢复机制和统计系统也获得这轮会话状态。</p>
+          </div>
+        </div>
+      </article>
+      <article class="card footer-card">
+        <h2>教学提示</h2>
+        <p>给别人讲这条链路时，优先讲清这 4 个事实。</p>
+        <div class="notes">
+          <div class="note">`REPL` 是交互壳，不是核心推理引擎。真正驱动输入变输出的是 `handlePromptSubmit -> query -> tool orchestration`。</div>
+          <div class="note">工具不是 REPL 直接执行的“按钮”，而是模型在采样过程中发出的 `tool_use` 指令，再由本地工具系统落地。</div>
+          <div class="note">持久化不是附属功能。`sessionStorage.ts` 直接影响恢复、继续会话、统计、日志重放和调试能力。</div>
+          <div class="note">token 不只存在于输入和输出两头。附件、工具结果、compact 和 continuation 都会改变整轮成本结构。</div>
+        </div>
+      </article>
+    </section>
+  </div>
+  <script>
+    const steps = [
+      {
+        title: "用户在 REPL 发起输入",
+        module: "REPL 输入层",
+        short: "文本、slash command、bash 模式输入都先在前端交互层汇合。",
+        summary: "用户输入最先进入 REPL 和 PromptInput 组件。此时系统仍在本地 UI 层，负责收集原始文本、引用、输入模式和当前会话上下文，还没有进入 API 采样。",
+        io: "输入是用户键入的 prompt、引用文件、粘贴内容或以 /、! 等模式字符触发的命令型输入；输出是一次可提交的用户意图对象。",
+        moduleText: "这里的重点不是渲染界面，而是形成统一提交入口。REPL 汇总当前消息、输入模式、引用、工作区状态，然后调用 handlePromptSubmit 继续后面的链路。",
+        refs: [
+          { label: "screens/REPL.tsx", href: "../restored-src/src/screens/REPL.tsx" },
+          { label: "components/PromptInput", href: "../restored-src/src/components/PromptInput/PromptInput.js" },
+          { label: "state/AppState.tsx", href: "../restored-src/src/state/AppState.tsx" }
+        ],
+        state: [
+          "用户文本先被包装成待提交输入，而不是直接发给模型。",
+          "当前会话的 AppState、消息列表、输入模式会被一起读取。",
+          "如果有本地弹窗或权限交互，提交可能暂时被阻塞。"
+        ],
+        token: { input: 20, tool: 0, output: 0 },
+        tokenText: "这个阶段还没有真实 API token 消耗，但系统已经在准备最终会进入模型上下文的输入材料。"
+      },
+      {
+        title: "handlePromptSubmit 整理请求",
+        module: "提交编排层",
+        short: "输入被规范化、补充引用、判断模式，并接入 query guard / queue。",
+        summary: "handlePromptSubmit 是从 UI 进入执行主线的网关。它会处理消息整理、历史记录、附件、引用展开、模式判断以及 query reservation，决定这次输入是立刻执行还是进入统一队列。",
+        io: "输入是前端收集好的用户意图与当前会话状态；输出是规范化后的消息链和一次可执行的 query 调用参数。",
+        moduleText: "这一层承担了把 UI 事件翻译成运行时请求的职责。它既要考虑 slash/bash 输入，也要考虑恢复、排队、权限确认和 query 并发保护。",
+        refs: [
+          { label: "utils/handlePromptSubmit.ts", href: "../restored-src/src/utils/handlePromptSubmit.ts" },
+          { label: "utils/processUserInput", href: "../restored-src/src/utils/processUserInput" },
+          { label: "utils/QueryGuard.js", href: "../restored-src/src/utils/QueryGuard.js" }
+        ],
+        state: [
+          "用户文本会被整理为消息对象，并可能附带附件或引用解析结果。",
+          "queryGuard 会尝试预留执行权，避免多个 turn 并发冲突。",
+          "统一消息队列开始参与调度，决定是否立即消费。"
+        ],
+        token: { input: 36, tool: 4, output: 0 },
+        tokenText: "这一步开始形成真正会被送入模型的 prompt 材料，输入 token 估算开始有意义。"
+      },
+      {
+        title: "队列与 QueryGuard 决定何时执行",
+        module: "调度层",
+        short: "如果当前 turn 正在运行，新的输入先进入统一命令队列等待。",
+        summary: "useQueueProcessor 与 messageQueueManager 组成统一调度层。它保证 REPL 在 query 空闲、没有本地阻塞 UI 时才消费排队输入，避免 turn 交错污染消息链。",
+        io: "输入是待执行的 queued commands；输出是满足条件后被正式 dispatch 的下一条用户输入。",
+        moduleText: "仓库里的输入并不总是即时执行。用户输入、任务通知、系统生成事件都可能进入同一个队列，再按优先级和当前执行状态触发消费。",
+        refs: [
+          { label: "hooks/useQueueProcessor.ts", href: "../restored-src/src/hooks/useQueueProcessor.ts" },
+          { label: "utils/messageQueueManager.js", href: "../restored-src/src/utils/messageQueueManager.js" },
+          { label: "utils/queueProcessor.js", href: "../restored-src/src/utils/queueProcessor.js" }
+        ],
+        state: [
+          "队列快照通过订阅驱动 REPL 重新渲染。",
+          "isQueryActive 和本地 JSX UI 状态共同决定是否允许消费队列。",
+          "统一队列让用户命令和系统通知走同一套调度协议。"
+        ],
+        token: { input: 40, tool: 6, output: 0 },
+        tokenText: "这里仍然主要是调度开销。token 还没显著增长，但它决定了什么时候真正开始消耗模型预算。"
+      },
+      {
+        title: "query.ts 准备 API 消息并进入主循环",
+        module: "Query 主引擎",
+        short: "消息被规范化、拼入 systemPrompt 与上下文，然后发起采样。",
+        summary: "query.ts 是整条链路的主引擎。它会把消息正规化，拼入 systemPrompt、userContext、systemContext、memory 附件和 compact 信息，然后进入流式采样循环。",
+        io: "输入是完整消息链、工具上下文、模型配置与预算参数；输出是流式 assistant 事件、请求开始事件和后续工具调用指令。",
+        moduleText: "如果要找用户输入到底什么时候真正进模型，这里就是答案。query 不只是一次 API 调用，它是一个可多轮继续的 async generator。",
+        refs: [
+          { label: "query.ts", href: "../restored-src/src/query.ts" },
+          { label: "utils/messages.js", href: "../restored-src/src/utils/messages.js" },
+          { label: "query/config.js", href: "../restored-src/src/query/config.js" }
+        ],
+        state: [
+          "messages 被标准化成 API 可接受的格式。",
+          "system prompt、用户上下文和系统上下文被拼接到最终请求中。",
+          "token budget、compact tracking、turnCount 等循环状态开始生效。"
+        ],
+        token: { input: 68, tool: 10, output: 14 },
+        tokenText: "从这一阶段开始，输入 token 进入真实消耗区间，后续每一轮继续采样都会叠加上下文与预算影响。"
+      },
+      {
+        title: "模型流式返回 assistant 事件",
+        module: "消息协议层",
+        short: "流里可能是文本增量、thinking、tool_use、错误或继续信号。",
+        summary: "采样开始后，REPL 不会等完整结果才渲染，而是消费 query 产生的流式事件。文本块会逐步展示，tool_use 会触发工具执行支路，错误和 compact 也会被包装成消息事件。",
+        io: "输入是模型流式返回的 event stream；输出是可显示消息、工具调用请求或继续下一轮的状态转移。",
+        moduleText: "这里要把流式输出和最终答案分开理解。REPL 看到的是中间事件流，最终显示结果是这些事件经过消息协议层后逐步累积出来的。",
+        refs: [
+          { label: "utils/messages.js", href: "../restored-src/src/utils/messages.js" },
+          { label: "types/message.js", href: "../restored-src/src/types/message.js" },
+          { label: "hooks/useLogMessages.js", href: "../restored-src/src/hooks/useLogMessages.js" }
+        ],
+        state: [
+          "assistant 文本片段会流式进入消息列表。",
+          "如果出现 tool_use，query 循环不会结束，而是转入工具回路。",
+          "compact、stop hooks、max_output_tokens 恢复都可能改变下一步执行。"
+        ],
+        token: { input: 68, tool: 14, output: 44 },
+        tokenText: "输出 token 在这里快速增长。真正的终端流式回答来自这个阶段持续产生的 assistant 片段。"
+      },
+      {
+        title: "tool_use 触发本地工具执行",
+        module: "工具编排层",
+        short: "模型要求读文件、改文件、跑命令时，交给 tool orchestration 落地。",
+        summary: "当 assistant 返回 tool_use 块时，本地工具系统会被唤起。toolOrchestration 负责调度工具，toolExecution 负责单次调用流程，权限系统与工具上下文一起决定是否允许执行。",
+        io: "输入是模型发出的 tool_use 指令；输出是本地执行得到的 tool_result、进度消息和可能的权限确认流。",
+        moduleText: "这一步是 agentic coding 工具和普通聊天模型的分水岭。模型不是只生成文本，而是在采样过程中主动请求本地能力，工具结果随后还要重新回到消息链里继续推理。",
+        refs: [
+          { label: "services/tools/toolOrchestration.ts", href: "../restored-src/src/services/tools/toolOrchestration.ts" },
+          { label: "services/tools/toolExecution.ts", href: "../restored-src/src/services/tools/toolExecution.ts" },
+          { label: "Tool.ts", href: "../restored-src/src/Tool.ts" }
+        ],
+        state: [
+          "toolUseContext、权限上下文和运行时状态一起参与执行判断。",
+          "工具可能产生流式进度消息，也可能要求用户确认权限。",
+          "本地结果会被包装成 tool_result 再送回 query 循环。"
+        ],
+        token: { input: 72, tool: 66, output: 48 },
+        tokenText: "工具本身不一定消耗模型 token，但工具结果文本会重新进入上下文，常常成为整轮 token 成本的大头。"
+      },
+      {
+        title: "tool_result 回灌，Query 继续下一轮",
+        module: "循环闭环层",
+        short: "本地执行结果被追加到消息链，模型据此继续生成最终答案。",
+        summary: "工具执行结束后，tool_result 会追加到消息序列中，query 继续后续采样。这就形成了典型的 agent loop：模型提出动作，本地执行，再把结果反馈给模型做下一步判断。",
+        io: "输入是工具返回的结果块和更新后的消息链；输出是新的 assistant 文本、更多工具调用，或 turn 的终止结果。",
+        moduleText: "如果要理解为什么一个请求会多轮往返，看这一段就够了。一次用户提交可能经历多轮 assistant -> tool_use -> tool_result -> assistant 的闭环。",
+        refs: [
+          { label: "query.ts", href: "../restored-src/src/query.ts" },
+          { label: "services/tools/StreamingToolExecutor.ts", href: "../restored-src/src/services/tools/StreamingToolExecutor.ts" },
+          { label: "utils/toolResultStorage.ts", href: "../restored-src/src/utils/toolResultStorage.ts" }
+        ],
+        state: [
+          "messages 队列追加 tool_result 后再次进入模型采样。",
+          "如果预算逼近上限，compact 或 continuation 逻辑可能介入。",
+          "最终 assistant 消息在这一轮或下一轮产出。"
+        ],
+        token: { input: 74, tool: 78, output: 72 },
+        tokenText: "这一步解释了为什么工具型对话常常 token 更重：工具结果重新进入上下文，推动下一轮推理。"
+      },
+      {
+        title: "会话落盘并在 REPL 中形成最终结果",
+        module: "持久化与渲染层",
+        short: "transcript、恢复信息、消息列表和统计信息一起更新。",
+        summary: "当 turn 结束或阶段性消息到达后，sessionStorage 会写入 transcript 与元数据，REPL 消息列表也同步渲染出用户可见结果。之后 continue、恢复、统计和日志分析都依赖这份持久化状态。",
+        io: "输入是本轮产生的用户消息、assistant 消息、工具结果与系统消息；输出是终端中的最终显示结果和可恢复的会话文件。",
+        moduleText: "最后看到的不是单纯 print 一行文本。REPL 渲染、会话 JSONL、工具结果存储、恢复指针和统计状态都在这里汇合，形成真正可持续的交互会话。",
+        refs: [
+          { label: "utils/sessionStorage.ts", href: "../restored-src/src/utils/sessionStorage.ts" },
+          { label: "hooks/useLogMessages.js", href: "../restored-src/src/hooks/useLogMessages.js" },
+          { label: "screens/REPL.tsx", href: "../restored-src/src/screens/REPL.tsx" }
+        ],
+        state: [
+          "消息被写入 transcript JSONL，供恢复和重放使用。",
+          "REPL 列表完成最终渲染，用户看到完整回答与工具痕迹。",
+          "会话元信息、统计与恢复指针获得更新。"
+        ],
+        token: { input: 74, tool: 78, output: 100 },
+        tokenText: "最终输出 token 在这个阶段沉淀为完整回答；同时 transcript 让这次 token 消耗与消息链可被后续恢复和分析。"
+      }
+    ];
+
+    const flowGrid = document.getElementById("flowGrid");
+    const progressText = document.getElementById("progressText");
+    const progressBar = document.getElementById("progressBar");
+    const playBtn = document.getElementById("playBtn");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const speedButtons = document.querySelectorAll("[data-speed]");
+    const stageIndex = document.getElementById("stageIndex");
+    const stageTitle = document.getElementById("stageTitle");
+    const stageSummary = document.getElementById("stageSummary");
+    const ioText = document.getElementById("ioText");
+    const moduleText = document.getElementById("moduleText");
+    const codeRefs = document.getElementById("codeRefs");
+    const stateList = document.getElementById("stateList");
+    const tokenText = document.getElementById("tokenText");
+    const inputMeter = document.getElementById("inputMeter");
+    const toolMeter = document.getElementById("toolMeter");
+    const outputMeter = document.getElementById("outputMeter");
+    const inputMeterText = document.getElementById("inputMeterText");
+    const toolMeterText = document.getElementById("toolMeterText");
+    const outputMeterText = document.getElementById("outputMeterText");
+
+    let current = 0;
+    let playing = false;
+    let speed = 2800;
+    let timer = null;
+
+    function createStepCard(step, index) {
+      const card = document.createElement("section");
+      card.className = "step upcoming";
+      card.innerHTML = `
+        <div class="step-num">${index + 1}</div>
+        <h3>${step.title}</h3>
+        <span class="module">${step.module}</span>
+        <p>${step.short}</p>
+        <div class="token-chip">${step.tokenText}</div>
+      `;
+      card.addEventListener("click", () => {
+        current = index;
+        stopAuto();
+        render();
+      });
+      return card;
+    }
+
+    function renderFlow() {
+      flowGrid.innerHTML = "";
+      steps.forEach((step, index) => {
+        const card = createStepCard(step, index);
+        if (index < current) card.classList.add("done");
+        if (index === current) card.classList.add("active");
+        if (index < current) card.classList.remove("upcoming");
+        flowGrid.appendChild(card);
+      });
+    }
+
+    function renderInfo() {
+      const step = steps[current];
+      stageIndex.textContent = `阶段 ${current + 1} / ${steps.length}`;
+      stageTitle.textContent = step.title;
+      stageSummary.textContent = step.summary;
+      ioText.textContent = step.io;
+      moduleText.textContent = step.moduleText;
+      tokenText.textContent = step.tokenText;
+      codeRefs.innerHTML = "";
+      step.refs.forEach(ref => {
+        const a = document.createElement("a");
+        a.className = "code-ref";
+        a.href = ref.href;
+        a.textContent = ref.label;
+        codeRefs.appendChild(a);
+      });
+      stateList.innerHTML = "";
+      step.state.forEach(item => {
+        const li = document.createElement("li");
+        li.textContent = item;
+        stateList.appendChild(li);
+      });
+      inputMeter.style.width = `${step.token.input}%`;
+      toolMeter.style.width = `${step.token.tool}%`;
+      outputMeter.style.width = `${step.token.output}%`;
+      inputMeterText.textContent = `${step.token.input}%`;
+      toolMeterText.textContent = `${step.token.tool}%`;
+      outputMeterText.textContent = `${step.token.output}%`;
+    }
+
+    function renderProgress() {
+      progressText.textContent = `阶段 ${current + 1} / ${steps.length}`;
+      progressBar.style.width = `${((current + 1) / steps.length) * 100}%`;
+      playBtn.textContent = playing ? "暂停播放" : "自动播放";
+    }
+
+    function render() {
+      renderFlow();
+      renderInfo();
+      renderProgress();
+    }
+
+    function stopAuto() {
+      playing = false;
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+      }
+      renderProgress();
+    }
+
+    function nextStep() {
+      if (current < steps.length - 1) {
+        current += 1;
+      } else {
+        stopAuto();
+      }
+      render();
+    }
+
+    function prevStep() {
+      if (current > 0) current -= 1;
+      render();
+    }
+
+    function startAuto() {
+      if (playing) return;
+      playing = true;
+      renderProgress();
+      timer = setInterval(() => {
+        if (current >= steps.length - 1) {
+          stopAuto();
+          return;
+        }
+        nextStep();
+      }, speed);
+    }
+
+    playBtn.addEventListener("click", () => playing ? stopAuto() : startAuto());
+    prevBtn.addEventListener("click", () => { stopAuto(); prevStep(); });
+    nextBtn.addEventListener("click", () => { stopAuto(); nextStep(); });
+    resetBtn.addEventListener("click", () => { stopAuto(); current = 0; render(); });
+
+    speedButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        speedButtons.forEach(btn => btn.classList.remove("active"));
+        button.classList.add("active");
+        speed = Number(button.dataset.speed);
+        if (playing) {
+          stopAuto();
+          startAuto();
+        }
+      });
+    });
+
+    document.addEventListener("keydown", event => {
+      if (event.key === "ArrowRight") { stopAuto(); nextStep(); }
+      if (event.key === "ArrowLeft") { stopAuto(); prevStep(); }
+      if (event.key === " " || event.code === "Space") {
+        event.preventDefault();
+        playing ? stopAuto() : startAuto();
+      }
+      if (event.key.toLowerCase() === "r") {
+        stopAuto();
+        current = 0;
+        render();
+      }
+    });
+
+    render();
+  </script>
+</body>
+</html>
