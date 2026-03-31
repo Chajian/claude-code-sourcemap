@@ -2,6 +2,15 @@
 
 [![linux.do](https://img.shields.io/badge/linux.do-huo0-blue?logo=linux&logoColor=white)](https://linux.do)
 
+[学习总目录](docs/README.md) | [14 天学习计划](docs/day-01-learning-plan.md) | [架构图](docs/claude-code-architecture.drawio) | [源码主目录](restored-src/src/) | [提取脚本](extract-sources.js)
+
+## 快速开始
+
+- 想快速了解这个仓库：先看 [学习总目录](docs/README.md)
+- 想按路径系统学习：从 [第 1 天学习文档](docs/day-01-learning-plan.md) 开始
+- 想先看整体结构：打开 [项目架构图](docs/claude-code-architecture.drawio)
+- 想直接读源码：进入 [restored-src/src/](restored-src/src/)
+
 > [!WARNING]
 > This repository is **unofficial** and is reconstructed from the public npm package and source map analysis, **for learning and research purposes only**.
 > It does **not** represent Anthropic's original internal development repository.
