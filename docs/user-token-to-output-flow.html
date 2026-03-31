@@ -725,8 +725,9 @@
         moduleText: "这里的重点不是渲染界面，而是形成统一提交入口。REPL 汇总当前消息、输入模式、引用、工作区状态，然后调用 handlePromptSubmit 继续后面的链路。",
         refs: [
           { label: "screens/REPL.tsx", href: "../restored-src/src/screens/REPL.tsx" },
-          { label: "components/PromptInput", href: "../restored-src/src/components/PromptInput/PromptInput.js" },
-          { label: "state/AppState.tsx", href: "../restored-src/src/state/AppState.tsx" }
+          { label: "components/PromptInput", href: "../restored-src/src/components/PromptInput/PromptInput.tsx" },
+          { label: "state/AppState.tsx", href: "../restored-src/src/state/AppState.tsx" },
+          { label: "阶段 1 深入拆解", href: "./stage-1-repl-input-flow.html" }
         ],
         state: [
           "用户文本先被包装成待提交输入，而不是直接发给模型。",

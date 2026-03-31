@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>阶段 1 深入拆解：REPL 输入如何变成一次可执行 turn</title>
+  <style>
+    :root {
+      --bg: #f6f0e7;
+      --panel: rgba(255, 251, 246, 0.92);
+      --panel-strong: #fffdfa;
+      --line: #d7c6b4;
+      --ink: #1f2b31;
+      --muted: #667179;
+      --accent: #0f766e;
+      --accent-soft: rgba(15, 118, 110, 0.12);
+      --accent-2: #c96a27;
+      --success: #2f855a;
+      --warning: #b7791f;
+      --shadow: 0 18px 44px rgba(50, 38, 22, 0.12);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(15, 118, 110, 0.09), transparent 30%),
+        radial-gradient(circle at top right, rgba(201, 106, 39, 0.11), transparent 28%),
+        linear-gradient(180deg, #fcf8f2 0%, var(--bg) 58%, #efe5d7 100%);
+      min-height: 100vh;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .page {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 28px 20px 48px;
+    }
+
+    .hero, .card {
+      background: var(--panel);
+      border: 1px solid rgba(215, 198, 180, 0.88);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 30px;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      top: -80px;
+      right: -80px;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(15, 118, 110, 0.18), transparent 66%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(31, 43, 49, 0.06);
+      color: var(--muted);
+      font-size: 13px;
+      letter-spacing: 0.04em;
+    }
+
+    h1 {
+      margin: 16px 0 12px;
+      font-size: clamp(30px, 5vw, 52px);
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      max-width: 980px;
+    }
+
+    .hero p {
+      max-width: 980px;
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.8;
+      color: #364148;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 14px;
+      margin-top: 22px;
+    }
+
+    .mini-card, .summary-item, .stack-card, .flow-step, .lane, .metric, .code-card, .note {
+      border-radius: 18px;
+      border: 1px solid rgba(215, 198, 180, 0.76);
+    }
+
+    .mini-card {
+      padding: 18px;
+      background: rgba(255, 255, 255, 0.62);
+    }
+
+    .mini-card strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 20px;
+    }
+
+    .mini-card p, .summary-item p, .stack-card p, .flow-step p, .lane p, .metric p, .code-card p, .note p {
+      margin: 0;
+      line-height: 1.75;
+      color: #415056;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .summary-item {
+      padding: 14px;
+      min-height: 110px;
+      background: rgba(15, 118, 110, 0.08);
+    }
+
+    .summary-item:nth-child(2n) {
+      background: rgba(201, 106, 39, 0.08);
+    }
+
+    .summary-item h3, .section-head h2, .code-card h3, .flow-step h3, .lane h3, .stack-card h3, .metric h3 {
+      margin: 0 0 8px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 16px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 10px 24px rgba(15, 118, 110, 0.22);
+    }
+
+    .btn-secondary {
+      background: #fff;
+      border: 1px solid rgba(215, 198, 180, 0.95);
+      color: var(--ink);
+    }
+
+    .section {
+      margin-top: 20px;
+      padding: 22px;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: end;
+      margin-bottom: 18px;
+    }
+
+    .section-head p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      line-height: 1.75;
+      font-size: 14px;
+      max-width: 820px;
+    }
+
+    .boundary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .stack-card {
+      padding: 18px;
+      background: var(--panel-strong);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: rgba(31, 43, 49, 0.06);
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .stack-card ul, .lane ul, .code-card ul {
+      margin: 10px 0 0;
+      padding-left: 18px;
+      line-height: 1.8;
+      color: #3b4950;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 14px;
+    }
+
+    .flow-step {
+      position: relative;
+      padding: 18px 18px 18px 72px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(246, 239, 230, 0.9));
+    }
+
+    .flow-step::before {
+      content: attr(data-step);
+      position: absolute;
+      left: 18px;
+      top: 18px;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .flow-step:nth-child(2)::before,
+    .flow-step:nth-child(4)::before,
+    .flow-step:nth-child(6)::before {
+      background: var(--accent-2);
+    }
+
+    .lanes {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .lane {
+      padding: 18px;
+      background: var(--panel-strong);
+    }
+
+    .lane-prompt { border-top: 4px solid var(--accent); }
+    .lane-bash { border-top: 4px solid var(--accent-2); }
+    .lane-slash { border-top: 4px solid var(--success); }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .metric {
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.68);
+    }
+
+    .metric strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 28px;
+      line-height: 1;
+    }
+
+    .code-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .code-card {
+      padding: 18px;
+      background: var(--panel-strong);
+    }
+
+    .code-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .code-link {
+      display: inline-flex;
+      align-items: center;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(31, 43, 49, 0.05);
+      border: 1px solid rgba(215, 198, 180, 0.75);
+      color: #334148;
+      font-size: 12px;
+    }
+
+    .notes {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .note {
+      padding: 16px;
+      background: rgba(201, 106, 39, 0.08);
+      border-left: 4px solid var(--accent-2);
+    }
+
+    .kbd {
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 8px;
+      background: rgba(31, 43, 49, 0.08);
+      border: 1px solid rgba(31, 43, 49, 0.12);
+      font-size: 12px;
+    }
+
+    code {
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 0.95em;
+    }
+
+    @media (max-width: 1120px) {
+      .hero-grid,
+      .boundary-grid,
+      .lanes,
+      .metrics,
+      .code-grid,
+      .notes {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .page {
+        padding: 16px 12px 30px;
+      }
+
+      .hero,
+      .section {
+        padding: 18px;
+      }
+
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .flow-step {
+        padding-left: 64px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="hero">
+      <div class="eyebrow">阶段 1 深入拆解 · 本地输入编排</div>
+      <h1>REPL 里的这次输入，究竟如何被整理成一次可执行的 turn？</h1>
+      <p>
+        这一页只讨论阶段 1 的边界之内发生的事：用户在 <code>REPL</code> 中键入文本、切换输入模式、插入引用、携带粘贴内容，
+        最终由 <code>handlePromptSubmit</code> 规范化成一份可以继续分流的提交请求。到这一步为止，系统仍主要停留在本地 UI 层，
+        还没有真正进入 <code>query.ts</code> 的 API 采样主循环。
+      </p>
+      <div class="hero-grid">
+        <div class="mini-card">
+          <strong>阶段 1 的核心结论</strong>
+          <p>
+            <code>PromptInput</code> 不是一个单纯的文本框，而是一次 turn 的前置编排器。它需要同时维护输入字符串、模式、
+            引用占位符、图片或文本粘贴内容、建议状态、历史状态，以及当前会话上下文。提交动作真正做的，不是“把文本发给模型”，
+            而是先把这些零散状态收束成一次受控的本地提交。
+          </p>
+        </div>
+        <div class="summary-grid">
+          <div class="summary-item">
+            <h3>输入还没进入模型</h3>
+            <p>这一层的职责是采集和规范化，而不是采样。真正进入模型要到后面的 <code>processUserInput</code> 和 <code>query</code>。</p>
+          </div>
+          <div class="summary-item">
+            <h3>模式先于路由</h3>
+            <p><code>prompt</code>、<code>bash</code>、<code>/slash</code> 会决定后续分支，但判断发生在本地提交前后，不在 API 层。</p>
+          </div>
+          <div class="summary-item">
+            <h3>引用不是纯展示</h3>
+            <p>用户看到的是占位符，提交前会经过 <code>parseReferences</code> 和文本展开，未被引用的图片也会被过滤掉。</p>
+          </div>
+          <div class="summary-item">
+            <h3>提交不等于立刻执行</h3>
+            <p>如果当前 turn 还在跑，<code>queryGuard</code> 会把这次输入送进队列，等待统一调度，而不是直接并发执行。</p>
+          </div>
+        </div>
+      </div>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="./user-token-to-output-flow.html">返回 8 阶段总览</a>
+        <a class="btn btn-secondary" href="../restored-src/src/utils/handlePromptSubmit.ts">直接看 handlePromptSubmit</a>
+      </div>
+    </section>
+
+    <section class="card section">
+      <div class="section-head">
+        <div>
+          <h2>阶段边界</h2>
+          <p>先把阶段 1 的“到哪为止”划清楚。很多读源码时的混乱，来自把本地输入编排和后续模型循环揉成了一层。</p>
+        </div>
+      </div>
+      <div class="boundary-grid">
+        <article class="stack-card">
+          <span class="badge">阶段 1 内</span>
+          <h3>本地交互与提交准备</h3>
+          <ul>
+            <li><code>PromptInput</code> 维护 <code>input</code>、<code>mode</code>、<code>pastedContents</code>、建议和历史状态。</li>
+            <li>按下 <span class="kbd">Enter</span> 后，<code>onSubmit</code> 会做建议拦截、空输入判断、图片特判、代理路由。</li>
+            <li><code>handlePromptSubmit</code> 会过滤图片、展开文本引用、识别即时命令、决定排队还是立即执行。</li>
+          </ul>
+        </article>
+        <article class="stack-card">
+          <span class="badge">阶段 1 边界点</span>
+          <h3>进入统一执行入口</h3>
+          <ul>
+            <li>直接执行路径会把输入包装成一个 <code>QueuedCommand</code>，再交给 <code>executeUserInput</code>。</li>
+            <li>排队路径会把同样的输入放进 <code>messageQueueManager</code>，稍后由队列处理器消费。</li>
+            <li>到这里为止，提交对象已经成型，但还没进入真正的模型采样循环。</li>
+          </ul>
+        </article>
+        <article class="stack-card">
+          <span class="badge">阶段 2 起</span>
+          <h3>输入开始进入真正分流</h3>
+          <ul>
+            <li><code>processUserInput</code> 开始根据 <code>mode</code> 和前缀，进入 prompt、bash 或 slash command 分支。</li>
+            <li><code>processTextPrompt</code>、<code>processBashCommand</code>、<code>processSlashCommand</code> 开始产出真正的消息对象。</li>
+            <li>随后才会进入 <code>query.ts</code> 的消息规范化与流式采样主线。</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="card section">
+      <div class="section-head">
+        <div>
+          <h2>输入生命周期</h2>
+          <p>把一次普通提交拆成 6 个连续动作，更容易理解为什么“文本框输入”在这里其实是一条局部状态机。</p>
+        </div>
+      </div>
+      <div class="timeline">
+        <article class="flow-step" data-step="1">
+          <h3>用户在 PromptInput 中输入内容</h3>
+          <p>
+            <code>PromptInput.tsx</code> 内部维护的不只是字符串。它还同时关心建议列表、历史回放、stash、引用 pill、
+            图片引用位置、底部状态栏和模式指示器。此时看到的内容是“可编辑表现层”，并不等于最终提交给后端的原始内容。
+          </p>
+        </article>
+        <article class="flow-step" data-step="2">
+          <h3>输入模式在本地即时变化</h3>
+          <p>
+            <code>inputModes.ts</code> 会把以 <code>!</code> 开头的输入识别成 <code>bash</code> 模式，普通文本维持
+            <code>prompt</code>。这一步只是在 UI 层决定后续解释方式，并没有马上触发 bash 工具或 slash command。
+          </p>
+        </article>
+        <article class="flow-step" data-step="3">
+          <h3>引用和粘贴内容以占位符存在</h3>
+          <p>
+            文本粘贴和图片粘贴不会直接内联到输入字符串里，而是通过类似 <code>[Image #N]</code>、文本引用占位符的形式留在输入中，
+            真正内容放在 <code>pastedContents</code>。这让用户可以删掉 pill，也让提交前有机会重新过滤和展开。
+          </p>
+        </article>
+        <article class="flow-step" data-step="4">
+          <h3>按下 Enter 先经过 PromptInput 自己的守门逻辑</h3>
+          <p>
+            <code>PromptInput</code> 会先看建议列表是否仍在显示、空输入是否只是想接受建议、是否在给 teammate 发送消息、
+            是否只提交图片、是否需要优先处理本地交互。也就是说，<span class="kbd">Enter</span> 先归 UI 自己解释，再决定是否真正提交。
+          </p>
+        </article>
+        <article class="flow-step" data-step="5">
+          <h3>handlePromptSubmit 规范化输入</h3>
+          <p>
+            这里会做 5 个关键动作：过滤未引用图片、展开文本引用、拦截 <code>exit</code> / <code>/exit</code>、
+            检查是否属于即时本地 slash command、以及在当前 turn 活跃时决定是否入队。到了这里，系统才形成一份稳定的“可执行提交”。
+          </p>
+        </article>
+        <article class="flow-step" data-step="6">
+          <h3>统一包装成 queued command 语义</h3>
+          <p>
+            无论是立即执行还是先排队，Claude Code 都倾向于把输入包装成统一的 <code>QueuedCommand</code> 语义，
+            这样后续 <code>executeUserInput</code> 和队列消费路径可以复用同一套处理逻辑，避免 prompt、图片和引用在两条路径上行为不一致。
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section class="card section">
+      <div class="section-head">
+        <div>
+          <h2>四类关键状态</h2>
+          <p>如果只记住一个源码阅读框架，就记住这四类状态分别负责什么，它们一起构成阶段 1 的主视角。</p>
+        </div>
+      </div>
+      <div class="metrics">
+        <article class="metric">
+          <strong>input</strong>
+          <p>用户正在编辑的可见字符串。它可能带有 <code>!</code>、<code>/</code> 和引用占位符，但还不是最终消息体。</p>
+        </article>
+        <article class="metric">
+          <strong>mode</strong>
+          <p><code>prompt</code> 或 <code>bash</code>。它决定后续怎样解释输入，但 slash command 仍然靠前缀 <code>/</code> 再判断。</p>
+        </article>
+        <article class="metric">
+          <strong>pastedContents</strong>
+          <p>真实的图片或文本粘贴内容仓库。占位符在字符串里，实体在这里，提交时会做引用一致性检查。</p>
+        </article>
+        <article class="metric">
+          <strong>queuedCommands</strong>
+          <p>等待执行的提交快照。当前 turn 忙时，新输入不会消失，而是先落到统一命令队列里。</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="card section">
+      <div class="section-head">
+        <div>
+          <h2>三条分流路径</h2>
+          <p>阶段 1 不会执行所有逻辑，但它必须先把输入预分成可理解的路径。真正的执行分支会在后面展开。</p>
+        </div>
+      </div>
+      <div class="lanes">
+        <article class="lane lane-prompt">
+          <h3>普通 prompt</h3>
+          <p>
+            默认路径。输入以自然语言文本为主，可能附带引用、图片和 IDE 选择内容。后续在 <code>processUserInput</code> 中进入
+            <code>processTextPrompt</code>，被包装成真正的 user message。
+          </p>
+          <ul>
+            <li>没有 <code>!</code> 模式前缀。</li>
+            <li>没有以 <code>/</code> 起始的 slash command 语义。</li>
+            <li>允许附件、图片和文本引用一起进入后续上下文。</li>
+          </ul>
+        </article>
+        <article class="lane lane-bash">
+          <h3>bash 模式</h3>
+          <p>
+            由 <code>!</code> 前缀触发，本地先把模式识别成 <code>bash</code>。提交后的文本值会去掉前缀字符，
+            后续由 <code>processBashCommand</code> 继续处理，不是 UI 层直接执行 shell。
+          </p>
+          <ul>
+            <li><code>getModeFromInput</code> 用前缀字符判定。</li>
+            <li><code>prependModeCharacterToInput</code> 负责历史与展示的一致性。</li>
+            <li>真正的工具调用仍然在更后面的执行层发生。</li>
+          </ul>
+        </article>
+        <article class="lane lane-slash">
+          <h3>slash command</h3>
+          <p>
+            输入以 <code>/</code> 开头时，<code>handlePromptSubmit</code> 会先尝试识别是否为即时本地命令。
+            如果是 <code>local-jsx</code> 且满足条件，甚至可以在 query 活跃时直接弹本地 UI；否则后续进入
+            <code>processSlashCommand</code> 路径。
+          </p>
+          <ul>
+            <li>本地即时命令典型如配置和诊断类面板。</li>
+            <li><code>skipSlashCommands</code> 可阻止远端桥接消息误触发本地 slash 行为。</li>
+            <li>未知 slash 输入可回退成普通文本语义，而不是强制报错。</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="card section">
+      <div class="section-head">
+        <div>
+          <h2>提交瞬间的规范化动作</h2>
+          <p>真正让阶段 1 变得“像一个系统”的，就是这几个细节。它们看起来琐碎，但共同决定输入是否稳定可重放。</p>
+        </div>
+      </div>
+      <div class="notes">
+        <article class="note">
+          <h3>1. 未引用图片会被丢弃</h3>
+          <p>
+            <code>handlePromptSubmit</code> 会先用 <code>parseReferences(input)</code> 找出仍然保留在文本里的引用编号。
+            图片如果已经没有对应占位符，就不会继续跟着这次提交走。这意味着“删掉 pill”在语义上是真删除。
+          </p>
+        </article>
+        <article class="note">
+          <h3>2. 文本引用会先展开</h3>
+          <p>
+            文本粘贴内容不是把编号发给模型，而是通过 <code>expandPastedTextRefs</code> 在提交前替换成真实文本。
+            队列路径和立即执行路径都会共用这一步，保证后续行为一致。
+          </p>
+        </article>
+        <article class="note">
+          <h3>3. exit 有本地短路逻辑</h3>
+          <p>
+            <code>exit</code>、<code>quit</code>、<code>:q</code> 之类输入不会按普通 prompt 继续流转，而是优先被改写成
+            <code>/exit</code> 或直接本地退出逻辑。这是本地会话控制，不属于模型推理的一部分。
+          </p>
+        </article>
+        <article class="note">
+          <h3>4. query 活跃时先排队</h3>
+          <p>
+            如果 <code>queryGuard.isActive</code> 为真，或者外部 loading 正在进行，本次提交会被 <code>enqueue</code>
+            送入统一队列。用户已经“提交成功”，但系统会延迟执行，避免多个 turn 并发污染消息链。
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section class="card section">
+      <div class="section-head">
+        <div>
+          <h2>代码地图</h2>
+          <p>建议按这个顺序读源码：先看 UI 守门，再看提交网关，最后看真正的输入分流。这样不会过早掉进 query 主循环细节。</p>
+        </div>
+      </div>
+      <div class="code-grid">
+        <article class="code-card">
+          <h3>第一站：PromptInput</h3>
+          <p>
+            重点关注 <code>onSubmit</code>、<code>mode</code>、<code>pastedContents</code>、建议拦截和引用位置计算。
+            这里决定“用户按下 Enter 时，是否真的允许把内容交给提交层”。
+          </p>
+          <div class="code-links">
+            <a class="code-link" href="../restored-src/src/components/PromptInput/PromptInput.tsx">PromptInput.tsx</a>
+            <a class="code-link" href="../restored-src/src/components/PromptInput/inputModes.ts">inputModes.ts</a>
+            <a class="code-link" href="../restored-src/src/components/PromptInput/PromptInputModeIndicator.tsx">PromptInputModeIndicator.tsx</a>
+          </div>
+        </article>
+        <article class="code-card">
+          <h3>第二站：提交网关</h3>
+          <p>
+            <code>handlePromptSubmit.ts</code> 是阶段 1 最重要的入口。它把 UI 采集到的零散状态压缩成统一的提交语义，
+            并决定走即时命令、排队还是立即执行。
+          </p>
+          <div class="code-links">
+            <a class="code-link" href="../restored-src/src/utils/handlePromptSubmit.ts">handlePromptSubmit.ts</a>
+            <a class="code-link" href="../restored-src/src/utils/QueryGuard.js">QueryGuard.js</a>
+            <a class="code-link" href="../restored-src/src/utils/messageQueueManager.js">messageQueueManager.js</a>
+          </div>
+        </article>
+        <article class="code-card">
+          <h3>第三站：真正的输入分流</h3>
+          <p>
+            当你理解阶段 1 后，再进入 <code>processUserInput</code>。这里才开始根据模式和前缀，把输入拆到
+            <code>processTextPrompt</code>、<code>processBashCommand</code>、<code>processSlashCommand</code>。
+          </p>
+          <div class="code-links">
+            <a class="code-link" href="../restored-src/src/utils/processUserInput/processUserInput.ts">processUserInput.ts</a>
+            <a class="code-link" href="../restored-src/src/utils/processUserInput/processTextPrompt.ts">processTextPrompt.ts</a>
+            <a class="code-link" href="../restored-src/src/utils/processUserInput/processSlashCommand.tsx">processSlashCommand.tsx</a>
+          </div>
+        </article>
+        <article class="code-card">
+          <h3>最后再回总览页</h3>
+          <p>
+            如果你已经搞清楚这页内容，再回到 8 阶段总览去看阶段 2 到阶段 8，会更容易理解为什么队列、采样、工具回路和 transcript
+            都建立在这个本地提交层之上。
+          </p>
+          <div class="code-links">
+            <a class="code-link" href="./user-token-to-output-flow.html">回到 user-token-to-output-flow.html</a>
+          </div>
+        </article>
+      </div>
+    </section>
+  </div>
+</body>
+</html>
