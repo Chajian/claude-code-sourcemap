@@ -1,0 +1,338 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36" version="29.6.4">
+  <diagram id="claude-code-arch" name="Claude Code Architecture">
+    <mxGraphModel dx="3178" dy="1697" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2400" pageHeight="1800" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="e30" edge="1" parent="1" source="session-restore" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#0277bd;" target="repl-screen">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1440" y="706" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="tools-reg" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#4caf50;" target="repl-screen">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="570" y="706" />
+              <mxPoint x="1020" y="706" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="commands-reg" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#4caf50;" target="repl-screen">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="240" y="706" />
+              <mxPoint x="1020" y="706" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="appstate-store" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#d6b656;" target="appstate-provider">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="title-bg" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#dee2e6;opacity=80;" value="" vertex="1">
+          <mxGeometry height="60" width="1740" x="40" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=24;fontStyle=1;fontColor=#2E5090;" value="Claude Code Sourcemap 仓库架构图" vertex="1">
+          <mxGeometry height="50" width="1540" x="140" y="25" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=11;fontColor=#495057;" value="主学习目录：restored-src/src | 主线：CLI 启动 → REPL → 输入分流 → Query → Tool Execution → Session Persistence" vertex="1">
+          <mxGeometry height="24" width="1580" x="120" y="78" as="geometry" />
+        </mxCell>
+        <mxCell id="lane1-bg" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;opacity=20;" value="" vertex="1">
+          <mxGeometry height="180" width="1740" x="40" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="lane1-title" parent="1" style="text;html=1;strokeColor=none;fillColor=#6c8ebf;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=16;fontStyle=1;fontColor=#ffffff;" value="1. 启动装配层" vertex="1">
+          <mxGeometry height="32" width="180" x="60" y="135" as="geometry" />
+        </mxCell>
+        <mxCell id="cli-entry" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" value="entrypoints/cli.tsx&#xa;CLI 启动分流&#xa;version / daemon / remote / worktree" vertex="1">
+          <mxGeometry height="78" width="260" x="90" y="195" as="geometry" />
+        </mxCell>
+        <mxCell id="main-entry" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" value="main.tsx&#xa;主装配层&#xa;配置、权限、MCP、plugins、skills、初始状态" vertex="1">
+          <mxGeometry height="78" width="300" x="420" y="195" as="geometry" />
+        </mxCell>
+        <mxCell id="repl-launcher" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" value="replLauncher.tsx&#xa;挂载 App + REPL" vertex="1">
+          <mxGeometry height="78" width="230" x="800" y="195" as="geometry" />
+        </mxCell>
+        <mxCell id="registry-note" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" value="装配时注册两大能力池&#xa;commands.ts + tools.ts" vertex="1">
+          <mxGeometry height="78" width="240" x="1110" y="195" as="geometry" />
+        </mxCell>
+        <mxCell id="lane2-bg" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;opacity=20;" value="" vertex="1">
+          <mxGeometry height="220" width="1740" x="40" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="lane2-title" parent="1" style="text;html=1;strokeColor=none;fillColor=#82b366;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=16;fontStyle=1;fontColor=#ffffff;" value="2. 能力注册与扩展层" vertex="1">
+          <mxGeometry height="32" width="240" x="60" y="345" as="geometry" />
+        </mxCell>
+        <mxCell id="commands-reg" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" value="commands.ts&#xa;Slash Commands 注册 / 过滤 / 合并" vertex="1">
+          <mxGeometry height="84" width="280" x="100" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="tools-reg" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" value="tools.ts&#xa;Builtin Tools + MCP Tools 组装" vertex="1">
+          <mxGeometry height="84" width="280" x="430" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="skills-node" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;" value="skills/&#xa;bundled skills + 动态技能目录" vertex="1">
+          <mxGeometry height="84" width="220" x="780" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="plugins-node" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;" value="plugins/&#xa;builtin plugins + plugin commands" vertex="1">
+          <mxGeometry height="84" width="220" x="1060" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="mcp-node" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0277bd;fontSize=12;" value="services/mcp/&#xa;MCP clients / commands / resources / tools" vertex="1">
+          <mxGeometry height="84" width="320" x="1340" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="lane3-bg" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;opacity=20;" value="" vertex="1">
+          <mxGeometry height="220" width="1740" x="40" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="lane3-title" parent="1" style="text;html=1;strokeColor=none;fillColor=#d6b656;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=16;fontStyle=1;fontColor=#ffffff;" value="3. 运行时状态与前台控制层" vertex="1">
+          <mxGeometry height="32" width="280" x="60" y="595" as="geometry" />
+        </mxCell>
+        <mxCell id="appstate-store" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" value="state/AppStateStore.ts&#xa;全局会话状态模型&#xa;settings / permissions / mcp / plugins / tasks / UI state" vertex="1">
+          <mxGeometry height="92" width="340" x="90" y="660" as="geometry" />
+        </mxCell>
+        <mxCell id="appstate-provider" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" value="state/AppState.tsx&#xa;Provider + useAppState + useSetAppState" vertex="1">
+          <mxGeometry height="92" width="280" x="480" y="660" as="geometry" />
+        </mxCell>
+        <mxCell id="onchange-state" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" value="state/onChangeAppState.ts&#xa;状态变化副作用同步&#xa;配置 / 会话元数据 / 权限模式" vertex="1">
+          <mxGeometry height="92" width="300" x="810" y="660" as="geometry" />
+        </mxCell>
+        <mxCell id="repl-screen" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" value="screens/REPL.tsx&#xa;前台控制台&#xa;状态消费 + UI 渲染 + onQuery + 队列消费" vertex="1">
+          <mxGeometry height="92" width="320" x="860" y="660" as="geometry" />
+        </mxCell>
+        <mxCell id="lane4-bg" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;opacity=20;" value="" vertex="1">
+          <mxGeometry height="220" width="1740" x="40" y="830" as="geometry" />
+        </mxCell>
+        <mxCell id="lane4-title" parent="1" style="text;html=1;strokeColor=none;fillColor=#9673a6;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=16;fontStyle=1;fontColor=#ffffff;" value="4. 输入分流与队列调度层" vertex="1">
+          <mxGeometry height="32" width="260" x="60" y="845" as="geometry" />
+        </mxCell>
+        <mxCell id="prompt-submit" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" value="utils/handlePromptSubmit.ts&#xa;turn 入口编排&#xa;立即执行 / 入队 / immediate command / onQuery" vertex="1">
+          <mxGeometry height="92" width="320" x="860" y="910" as="geometry" />
+        </mxCell>
+        <mxCell id="process-input" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" value="utils/processUserInput/*&#xa;prompt / slash / bash 分流&#xa;规范化消息 + shouldQuery" vertex="1">
+          <mxGeometry height="92" width="300" x="470" y="910" as="geometry" />
+        </mxCell>
+        <mxCell id="queue-mgr" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" value="utils/messageQueueManager.ts&#xa;统一命令队列&#xa;now / next / later 优先级" vertex="1">
+          <mxGeometry height="92" width="300" x="1240" y="910" as="geometry" />
+        </mxCell>
+        <mxCell id="queue-hook" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" value="hooks/useQueueProcessor.ts&#xa;系统空闲时自动消费队列" vertex="1">
+          <mxGeometry height="92" width="180" x="1560" y="910" as="geometry" />
+        </mxCell>
+        <mxCell id="lane5-bg" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9c27b0;opacity=20;" value="" vertex="1">
+          <mxGeometry height="270" width="1740" x="40" y="1080" as="geometry" />
+        </mxCell>
+        <mxCell id="lane5-title" parent="1" style="text;html=1;strokeColor=none;fillColor=#9c27b0;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=16;fontStyle=1;fontColor=#ffffff;" value="5. Query 与工具执行层" vertex="1">
+          <mxGeometry height="32" width="240" x="60" y="1095" as="geometry" />
+        </mxCell>
+        <mxCell id="query-node" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9c27b0;fontSize=12;" value="query.ts&#xa;agentic query 主循环&#xa;streaming / compact / tool_use / retry / stop hooks" vertex="1">
+          <mxGeometry height="100" width="330" x="860" y="1165" as="geometry" />
+        </mxCell>
+        <mxCell id="messages-node" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9c27b0;fontSize=12;" value="utils/messages.ts&#xa;消息协议层&#xa;user / assistant / system / tool_result / pairing" vertex="1">
+          <mxGeometry height="100" width="300" x="470" y="1165" as="geometry" />
+        </mxCell>
+        <mxCell id="tool-contract" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9c27b0;fontSize=12;" value="Tool.ts&#xa;工具公共契约&#xa;schema / permission / progress / render / context" vertex="1">
+          <mxGeometry height="100" width="280" x="1240" y="1165" as="geometry" />
+        </mxCell>
+        <mxCell id="tool-exec" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;" value="services/tools/toolExecution.ts&#xa;单次工具调用流水线&#xa;validate → permission → hooks → call → tool_result" vertex="1">
+          <mxGeometry height="100" width="300" x="1410" y="1165" as="geometry" />
+        </mxCell>
+        <mxCell id="tool-orch" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;" value="toolOrchestration.ts + StreamingToolExecutor.ts&#xa;串行 / 并发 / streaming 工具编排" vertex="1">
+          <mxGeometry height="52" width="300" x="1410" y="1290" as="geometry" />
+        </mxCell>
+        <mxCell id="bash-tool" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;" value="BashTool&#xa;复杂 shell 工具&#xa;安全、sandbox、progress、background" vertex="1">
+          <mxGeometry height="52" width="240" x="1140" y="1290" as="geometry" />
+        </mxCell>
+        <mxCell id="edit-tool" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;" value="FileEditTool&#xa;典型编辑工具&#xa;校验、路径、diff、一致性" vertex="1">
+          <mxGeometry height="52" width="240" x="850" y="1290" as="geometry" />
+        </mxCell>
+        <mxCell id="lane6-bg" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0277bd;opacity=20;" value="" vertex="1">
+          <mxGeometry height="220" width="1740" x="40" y="1380" as="geometry" />
+        </mxCell>
+        <mxCell id="lane6-title" parent="1" style="text;html=1;strokeColor=none;fillColor=#0277bd;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=16;fontStyle=1;fontColor=#ffffff;" value="6. 会话持久化与扩展控制层" vertex="1">
+          <mxGeometry height="32" width="320" x="60" y="1395" as="geometry" />
+        </mxCell>
+        <mxCell id="session-store" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0277bd;fontSize=12;" value="utils/sessionStorage.ts&#xa;JSONL transcript + metadata + queue operations + worktree state" vertex="1">
+          <mxGeometry height="92" width="360" x="860" y="1465" as="geometry" />
+        </mxCell>
+        <mxCell id="session-restore" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0277bd;fontSize=12;" value="utils/sessionRestore.ts&#xa;resume 恢复&#xa;fileHistory / attribution / todos / agent / worktree" vertex="1">
+          <mxGeometry height="92" width="300" x="1290" y="1465" as="geometry" />
+        </mxCell>
+        <mxCell id="hooks-node" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f0ff;strokeColor=#1565c0;fontSize=12;" value="utils/hooks.ts + query/stopHooks.ts&#xa;生命周期 hooks / permission hooks / stop hooks" vertex="1">
+          <mxGeometry height="92" width="320" x="470" y="1465" as="geometry" />
+        </mxCell>
+        <mxCell id="external-extensions" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" value="外部扩展面&#xa;MCP / Plugins / Skills / Worktree / Remote" vertex="1">
+          <mxGeometry height="92" width="140" x="1620" y="1465" as="geometry" />
+        </mxCell>
+        <mxCell id="repo-note-header" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d79b00;strokeColor=#d79b00;fontSize=14;fontStyle=1;align=center;fontColor=#ffffff;" value="📌 仓库定位" vertex="1">
+          <mxGeometry height="34" width="280" x="1840" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="repo-note" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;align=left;verticalAlign=top;fontSize=11;" value="这是一个基于 @anthropic-ai/claude-code 的 cli.js.map 还原出的研究仓库。&#xa;&#xa;重点阅读目录：restored-src/src&#xa;可跳过：restored-src/node_modules&#xa;&#xa;学习主线：&#xa;CLI → Main → Commands/Tools → AppState/REPL → Query → Tools → Session" vertex="1">
+          <mxGeometry height="220" width="280" x="1840" y="154" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-header" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#666666;strokeColor=#666666;fontSize=14;fontStyle=1;align=center;fontColor=#ffffff;" value="图例" vertex="1">
+          <mxGeometry height="34" width="280" x="1840" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="legend" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f0f0;strokeColor=#666666;align=left;verticalAlign=top;fontSize=11;" value="蓝色：启动 / 输入 / 会话基础设施&#xa;绿色：注册层与扩展汇聚&#xa;黄色：状态与权限相关控制点&#xa;紫色：Query / 消息 / Tool 协议&#xa;橙色：工具执行编排&#xa;红色：代表性高风险或高复杂工具&#xa;&#xa;实线箭头：主执行链&#xa;虚线箭头：扩展或持久化反馈链" vertex="1">
+          <mxGeometry height="220" width="280" x="1840" y="444" as="geometry" />
+        </mxCell>
+        <mxCell id="secondary-note-header" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1565c0;strokeColor=#1565c0;fontSize=14;fontStyle=1;align=center;fontColor=#ffffff;" value="二开入口提示" vertex="1">
+          <mxGeometry height="34" width="280" x="1840" y="700" as="geometry" />
+        </mxCell>
+        <mxCell id="secondary-note" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#1565c0;align=left;verticalAlign=top;fontSize=11;" value="加命令：commands.ts + commands/*&#xa;加工具：Tool.ts + tools.ts + tools/*&#xa;改 REPL：REPL.tsx + handlePromptSubmit.ts&#xa;改 Query：query.ts + messages.ts&#xa;改恢复：sessionStorage.ts + sessionRestore.ts&#xa;改扩展：services/mcp + plugins + skills" vertex="1">
+          <mxGeometry height="200" width="280" x="1840" y="734" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="cli-entry" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=3;strokeColor=#2E5090;" target="main-entry">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="main-entry" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=3;strokeColor=#2E5090;" target="repl-launcher">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="repl-launcher" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=3;strokeColor=#2E5090;" target="repl-screen">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1020" y="560" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="registry-note" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#4caf50;dashed=1;dashPattern=5 5;" target="commands-reg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="registry-note" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#4caf50;dashed=1;dashPattern=5 5;" target="tools-reg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="skills-node" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#d79b00;" target="commands-reg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="plugins-node" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#d79b00;" target="commands-reg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="mcp-node" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#0277bd;" target="tools-reg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="mcp-node" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#0277bd;dashed=1;dashPattern=5 5;" target="commands-reg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="appstate-provider" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#d6b656;" target="repl-screen">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e14" edge="1" parent="1" source="repl-screen" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#d6b656;dashed=1;dashPattern=5 5;" target="onchange-state">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1240" y="706" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e15" edge="1" parent="1" source="repl-screen" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=3;strokeColor=#9673a6;" target="prompt-submit">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e16" edge="1" parent="1" source="prompt-submit" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=3;strokeColor=#2E5090;" target="process-input">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e17" edge="1" parent="1" source="prompt-submit" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#2E5090;dashed=1;dashPattern=5 5;" target="queue-mgr">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1210" y="956" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e18" edge="1" parent="1" source="queue-mgr" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#2E5090;" target="queue-hook">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1550" y="956" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e19" edge="1" parent="1" source="queue-hook" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#2E5090;dashed=1;dashPattern=5 5;" target="prompt-submit">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1650" y="1040" />
+              <mxPoint x="1020" y="1040" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e20" edge="1" parent="1" source="process-input" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=3;strokeColor=#9c27b0;" target="query-node">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="620" y="1215" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e21" edge="1" parent="1" source="query-node" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#9c27b0;" target="messages-node">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="810" y="1215" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e22" edge="1" parent="1" source="query-node" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#9c27b0;" target="tool-contract">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1220" y="1215" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e23" edge="1" parent="1" source="tool-contract" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#d79b00;" target="tool-exec">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e24" edge="1" parent="1" source="tool-exec" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#d79b00;" target="tool-orch">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1560" y="1278" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e25" edge="1" parent="1" source="tool-orch" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#b85450;" target="bash-tool">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e26" edge="1" parent="1" source="tool-orch" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#b85450;" target="edit-tool">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e27" edge="1" parent="1" source="messages-node" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=3;strokeColor=#9c27b0;" target="repl-screen">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="620" y="790" />
+              <mxPoint x="1020" y="790" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e28" edge="1" parent="1" source="query-node" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#0277bd;dashed=1;dashPattern=5 5;" target="session-store">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e29" edge="1" parent="1" source="session-store" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#0277bd;" target="session-restore">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1270" y="1511" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e31" edge="1" parent="1" source="hooks-node" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#1565c0;dashed=1;dashPattern=5 5;" target="query-node">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="820" y="1511" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e32" edge="1" parent="1" source="hooks-node" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#1565c0;dashed=1;dashPattern=5 5;" target="tool-exec">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="830" y="1215" />
+              <mxPoint x="1400" y="1215" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e33" edge="1" parent="1" source="external-extensions" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#82b366;dashed=1;dashPattern=5 5;" target="commands-reg">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1690" y="452" />
+              <mxPoint x="240" y="452" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e34" edge="1" parent="1" source="external-extensions" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#82b366;dashed=1;dashPattern=5 5;" target="tools-reg">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1670" y="470" />
+              <mxPoint x="570" y="470" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
