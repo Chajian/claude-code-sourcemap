@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>阶段 6 深入拆解：tool_use 如何触发本地工具执行</title>
+  <style>
+    :root {
+      --bg: #f6f0e7;
+      --panel: rgba(255, 251, 246, 0.92);
+      --panel-strong: #fffdfa;
+      --line: #d7c6b4;
+      --ink: #1f2b31;
+      --muted: #667179;
+      --accent: #0f766e;
+      --accent-soft: rgba(15, 118, 110, 0.12);
+      --accent-2: #c96a27;
+      --success: #2f855a;
+      --warning: #b7791f;
+      --danger: #c53030;
+      --shadow: 0 18px 44px rgba(50, 38, 22, 0.12);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(15, 118, 110, 0.09), transparent 30%),
+        radial-gradient(circle at top right, rgba(201, 106, 39, 0.11), transparent 28%),
+        linear-gradient(180deg, #fcf8f2 0%, var(--bg) 58%, #efe5d7 100%);
+      min-height: 100vh;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .page {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 28px 20px 48px;
+    }
+
+    .hero, .card {
+      background: var(--panel);
+      border: 1px solid rgba(215, 198, 180, 0.88);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 30px;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      top: -80px;
+      right: -80px;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(15, 118, 110, 0.18), transparent 66%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(31, 43, 49, 0.06);
+      color: var(--muted);
+      font-size: 13px;
+      letter-spacing: 0.04em;
+    }
+
+    h1 {
+      margin: 16px 0 12px;
+      font-size: clamp(30px, 5vw, 52px);
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      max-width: 980px;
+    }
+
+    .hero p {
+      max-width: 980px;
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.8;
+      color: #364148;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 14px;
+      margin-top: 22px;
+    }
+
+    .mini-card, .summary-item, .stack-card, .flow-step, .lane, .metric, .code-card, .note, .perm-card {
+      border-radius: 18px;
+      border: 1px solid rgba(215, 198, 180, 0.76);
+    }
+
+    .mini-card {
+      padding: 18px;
+      background: rgba(255, 255, 255, 0.62);
+    }
+
+    .mini-card strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 20px;
+    }
+
+    .mini-card p, .summary-item p, .stack-card p, .flow-step p, .lane p, .metric p, .code-card p, .note p, .perm-card p {
+      margin: 0;
+      line-height: 1.75;
+      color: #415056;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .summary-item {
+      padding: 14px;
+      min-height: 110px;
+      background: rgba(15, 118, 110, 0.08);
+    }
+
+    .summary-item:nth-child(2n) {
+      background: rgba(201, 106, 39, 0.08);
+    }
+
+    .summary-item h3, .section-head h2, .code-card h3, .flow-step h3, .lane h3, .stack-card h3, .metric h3, .perm-card h3 {
+      margin: 0 0 8px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 16px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: transform 160ms ease, box-shadow 160ms ease;
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 10px 24px rgba(15, 118, 110, 0.22);
+    }
+
+    .btn-secondary {
+      background: #fff;
+      border: 1px solid rgba(215, 198, 180, 0.95);
+      color: var(--ink);
+    }
+
+    .section {
+      margin-top: 20px;
+      padding: 22px;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: end;
+      margin-bottom: 18px;
+    }
+
+    .section-head p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      line-height: 1.75;
+      font-size: 14px;
+      max-width: 820px;
+    }
+
+    .boundary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .stack-card {
+      padding: 18px;
+      background: var(--panel-strong);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: rgba(31, 43, 49, 0.06);
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .stack-card ul, .lane ul, .code-card ul, .perm-card ul {
+      margin: 10px 0 0;
+      padding-left: 18px;
+      line-height: 1.8;
+      color: #3b4950;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 14px;
+    }
+
+    .flow-step {
+      position: relative;
+      padding: 18px 18px 18px 72px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(246, 239, 230, 0.9));
+      transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+    }
+
+    .flow-step.active {
+      transform: translateY(-3px);
+      border-color: rgba(15, 118, 110, 0.45);
+      box-shadow: 0 12px 28px rgba(15, 118, 110, 0.14);
+      background: linear-gradient(180deg, rgba(236, 252, 250, 0.98), rgba(222, 247, 244, 0.95));
+    }
+
+    .flow-step.done {
+      border-color: rgba(47, 133, 90, 0.26);
+      background: linear-gradient(180deg, rgba(244, 252, 247, 0.92), rgba(237, 248, 240, 0.88));
+    }
+
+    .flow-step.upcoming {
+      opacity: 0.55;
+    }
+
+    .flow-step::before {
+      content: attr(data-step);
+      position: absolute;
+      left: 18px;
+      top: 18px;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: rgba(31, 43, 49, 0.1);
+      color: var(--ink);
+      font-weight: 700;
+      font-size: 14px;
+      transition: background 220ms ease, color 220ms ease;
+    }
+
+    .flow-step.active::before {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .flow-step.done::before {
+      background: var(--success);
+      color: #fff;
+    }
+
+    .lanes {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .lane {
+      padding: 18px;
+      background: var(--panel-strong);
+    }
+
+    .lane-orch { border-top: 4px solid var(--accent); }
+    .lane-exec { border-top: 4px solid var(--accent-2); }
+    .lane-perm { border-top: 4px solid var(--warning); }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .metric {
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.68);
+    }
+
+    .metric strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 28px;
+      line-height: 1;
+    }
+
+    .code-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .code-card {
+      padding: 18px;
+      background: var(--panel-strong);
+    }
+
+    .code-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .code-link {
+      display: inline-flex;
+      align-items: center;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(31, 43, 49, 0.05);
+      border: 1px solid rgba(215, 198, 180, 0.75);
+      color: #334148;
+      font-size: 12px;
+    }
+
+    .notes {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .note {
+      padding: 16px;
+      background: rgba(201, 106, 39, 0.08);
+      border-left: 4px solid var(--accent-2);
+    }
+
+    .kbd {
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 8px;
+      background: rgba(31, 43, 49, 0.08);
+      border: 1px solid rgba(31, 43, 49, 0.12);
+      font-size: 12px;
+    }
+
+    code {
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: rgba(31, 43, 49, 0.07);
+      font-size: 13px;
+    }
+
+    /* ── 权限决策卡片 ── */
+    .perm-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .perm-card {
+      padding: 18px;
+      background: var(--panel-strong);
+    }
+
+    .perm-allow { border-top: 4px solid var(--success); }
+    .perm-ask { border-top: 4px solid var(--warning); }
+    .perm-deny { border-top: 4px solid var(--danger); }
+
+    /* ── 交互式流程图 ── */
+    .toolbar {
+      margin-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .progress-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 260px;
+    }
+
+    .progress-bar {
+      flex: 1;
+      height: 10px;
+      background: rgba(31, 42, 48, 0.08);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-bar span {
+      display: block;
+      width: 0;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      border-radius: inherit;
+      transition: width 320ms ease;
+    }
+
+    /* ── 详情面板 ── */
+    .detail-panel {
+      margin-top: 14px;
+      padding: 20px;
+      border-radius: 18px;
+      border: 1px solid rgba(215, 198, 180, 0.76);
+      background: linear-gradient(135deg, rgba(15, 118, 110, 0.08), rgba(201, 106, 39, 0.06));
+      transition: opacity 200ms ease;
+    }
+
+    .detail-panel h3 {
+      margin: 0 0 8px;
+      font-size: 22px;
+    }
+
+    .detail-panel p {
+      margin: 0 0 14px;
+      line-height: 1.8;
+      color: #37454b;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .detail-box {
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(215, 198, 180, 0.6);
+      background: var(--panel-strong);
+    }
+
+    .detail-box h4 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .detail-box p, .detail-box ul {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.75;
+      color: #3b4950;
+    }
+
+    .detail-box ul { padding-left: 18px; }
+
+    /* ── 数据流序列图 ── */
+    .seq-canvas {
+      display: block;
+      min-width: 900px;
+      border-radius: 14px;
+      background: var(--panel-strong);
+      border: 1px solid rgba(215, 198, 180, 0.6);
+    }
+
+    .seq-wrap {
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+
+    /* ── footer grid ── */
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 18px;
+      margin-top: 20px;
+    }
+
+    .footer-card {
+      padding: 22px;
+    }
+
+    .footer-card h2 {
+      margin: 0 0 10px;
+      font-size: 22px;
+    }
+
+    .footer-card p {
+      margin: 0 0 14px;
+      color: var(--muted);
+      line-height: 1.75;
+      font-size: 14px;
+    }
+
+    @media (max-width: 1100px) {
+      .hero-grid, .footer-grid { grid-template-columns: 1fr; }
+      .boundary-grid, .lanes, .perm-grid { grid-template-columns: 1fr; }
+      .detail-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 720px) {
+      .page { padding: 16px 12px 28px; }
+      .hero, .section { padding: 18px; }
+      .summary-grid, .code-grid, .notes, .metrics { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <!-- ═══════════ HERO ═══════════ -->
+    <section class="hero">
+      <div class="eyebrow">阶段 6 / 8 · 工具编排层深入拆解</div>
+      <h1>tool_use 触发本地工具执行：从模型指令到真实动作的全流程</h1>
+      <p>
+        这是整条链路中区分"聊天模型"和"agentic 工具"的关键阶段。当模型在采样过程中返回 <code>tool_use</code> 块时，
+        query 循环不会结束，而是转入工具执行支路：编排层决定并发策略，执行层完成单次调用，权限系统层层把关，
+        hooks 在每个关键节点都能介入。本页拆解这条从 tool_use 到 tool_result 的完整路径。
+      </p>
+
+      <div class="hero-grid">
+        <div class="mini-card">
+          <strong>核心观察：工具执行不是"调一个函数"那么简单</strong>
+          <p>
+            从 <code>query.ts</code> 调用 <code>runTools()</code> 开始，到最终产出 <code>tool_result</code> 并回灌消息链，
+            中间经历了批次分区、并发调度、输入校验、Hooks 拦截、权限多层决策、实际执行、结果后处理等 7 个阶段。
+            每个阶段都可能改变执行走向——拒绝、修改输入、追加上下文，甚至阻止后续继续。
+          </p>
+        </div>
+        <div class="summary-grid">
+          <div class="summary-item">
+            <h3>编排层决定并发策略</h3>
+            <p>只读工具（如文件读取）可以并行执行（最多 10 个），写操作必须串行。</p>
+          </div>
+          <div class="summary-item">
+            <h3>权限不止一道关卡</h3>
+            <p>规则层、模式层、Hook 层、分类器层、交互层五层联合决策。</p>
+          </div>
+          <div class="summary-item">
+            <h3>Hooks 贯穿前后</h3>
+            <p>PreToolUse / PostToolUse hooks 可以修改输入、拦截执行、转换输出。</p>
+          </div>
+          <div class="summary-item">
+            <h3>结果回灌驱动循环</h3>
+            <p>tool_result 追加到消息链后，query 进入下一轮采样——这就是 agent loop。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="./user-token-to-output-flow.html">返回主链路</a>
+        <a class="btn btn-secondary" href="../restored-src/src/services/tools/toolOrchestration.ts">toolOrchestration.ts</a>
+        <a class="btn btn-secondary" href="../restored-src/src/services/tools/toolExecution.ts">toolExecution.ts</a>
+        <a class="btn btn-secondary" href="../restored-src/src/Tool.ts">Tool.ts</a>
+      </div>
+    </section>
+
+    <!-- ═══════════ 三大层级 ═══════════ -->
+    <section class="card section">
+      <div class="section-head">
+        <div>
+          <h2>三层架构：编排 → 执行 → 权限</h2>
+          <p>工具系统由三个职责清晰的层级组成。编排层负责"调度谁先跑"，执行层负责"把一个工具跑完"，权限层负责"能不能跑"。</p>
+        </div>
+      </div>
+      <div class="lanes">
+        <div class="lane lane-orch">
+          <h3>toolOrchestration — 编排层</h3>
+          <span class="badge">调度 · 并发 · 上下文</span>
+          <ul>
+            <li><code>runTools()</code> — 入口，接收 query 传来的 tool_use 列表</li>
+            <li><code>partitionToolCalls()</code> — 按 isConcurrencySafe 分批</li>
+            <li><code>runToolsConcurrently()</code> — 并行批（最多 10 个只读工具）</li>
+            <li><code>runToolsSerially()</code> — 串行批（写操作逐个执行）</li>
+            <li>批次间应用上下文修改器（如 cwd 变更）</li>
+          </ul>
+          <div class="code-links">
+            <a class="code-link" href="../restored-src/src/services/tools/toolOrchestration.ts">toolOrchestration.ts (189 行)</a>
+          </div>
+        </div>
+        <div class="lane lane-exec">
+          <h3>toolExecution — 执行层</h3>
+          <span class="badge">校验 · 调用 · 结果</span>
+          <ul>
+            <li><code>runToolUse()</code> — 单个 tool_use 的完整执行流程</li>
+            <li>Zod 输入校验 + <code>validateInput()</code></li>
+            <li>PreToolUse hooks → 权限决策 → <code>tool.call()</code></li>
+            <li>PostToolUse hooks → 结果映射 → 产出 MessageUpdate</li>
+            <li>错误时走 PostToolUseFailure hooks</li>
+          </ul>
+          <div class="code-links">
+            <a class="code-link" href="../restored-src/src/services/tools/toolExecution.ts">toolExecution.ts (1745 行)</a>
+          </div>
+        </div>
+        <div class="lane lane-perm">
+          <h3>permissions — 权限层</h3>
+          <span class="badge">规则 · 模式 · 分类器</span>
+          <ul>
+            <li>规则层：settings / project / CLI 中的 allow / deny / ask 规则</li>
+            <li>模式层：default / auto / acceptEdits / bypassPermissions / dontAsk</li>
+            <li>Hook 层：PreToolUse hook 可以提前决策</li>
+            <li>分类器层：auto 模式下 AI 分类器评估风险</li>
+            <li>交互层：最终回退到用户确认弹窗</li>
+          </ul>
+          <div class="code-links">
+            <a class="code-link" href="../restored-src/src/utils/permissions/permissions.ts">permissions.ts</a>
+            <a class="code-link" href="../restored-src/src/types/permissions.ts">permissions types (442 行)</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ 交互式 7 步流程 ═══════════ -->
+    <section class="card section">
+      <div class="section-head">
+        <div>
+          <h2>工具执行的 7 步流程</h2>
+          <p>点击每一步查看详细说明。按 <span class="kbd">←</span> / <span class="kbd">→</span> 或 <span class="kbd">空格</span> 控制播放。</p>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="controls">
+          <button id="prevBtn" class="btn btn-secondary">上一步</button>
+          <button id="playBtn" class="btn btn-primary">自动播放</button>
+          <button id="nextBtn" class="btn btn-secondary">下一步</button>
+          <button id="resetBtn" class="btn btn-secondary">重置</button>
+        </div>
+        <div class="progress-wrap">
+          <span id="progressText">步骤 1 / 7</span>
+          <div class="progress-bar"><span id="progressBar"></span></div>
+        </div>
+      </div>
+
+      <div id="timeline" class="timeline" style="margin-top:16px;"></div>
+      <div id="detailPanel" class="detail-panel"></div>
+    </section>
+
+    <!-- ═══════════ 序列图 ═══════════ -->
+    <section class="card section">
+      <div class="section-head">
+        <div>
+          <h2>数据流序列图</h2>
+          <p>从 query.ts 发起 runTools 到 tool_result 回灌的完整消息序列。</p>
+        </div>
+      </div>
+      <div class="seq-wrap"><canvas id="seqCanvas" class="seq-canvas"></canvas></div>
+    </section>
+
+    <!-- ═══════════ 并发策略 ═══════════ -->
+    <section class="card section">
+      <div class="section-head">
+        <div>
+          <h2>并发批次策略：partitionToolCalls</h2>
+          <p>编排层不是把所有 tool_use 一股脑丢出去。它先分区，再按安全级别决定能否并行。</p>
+        </div>
+      </div>
+      <div class="boundary-grid">
+        <div class="stack-card">
+          <h3>并行批（Concurrent）</h3>
+          <span class="badge" style="background:rgba(47,133,90,0.12);color:var(--success)">isConcurrencySafe = true</span>
+          <ul>
+            <li>读文件（Read、Glob、Grep）</li>
+            <li>截图、WebSearch 等只读操作</li>
+            <li>最多 10 个同时执行</li>
+            <li>上下文修改器在批次结束后统一应用</li>
+          </ul>
+        </div>
+        <div class="stack-card">
+          <h3>串行批（Serial）</h3>
+          <span class="badge" style="background:rgba(197,48,48,0.12);color:var(--danger)">isConcurrencySafe = false</span>
+          <ul>
+            <li>写文件（Edit、Write）</li>
+            <li>执行命令（Bash）</li>
+            <li>每个工具单独执行、立即更新上下文</li>
+            <li>确保后续工具看到前一个的副作用</li>
+          </ul>
+        </div>
+        <div class="stack-card">
+          <h3>分区算法</h3>
+          <span class="badge">partitionToolCalls()</span>
+          <ul>
+            <li>遍历 tool_use 列表</li>
+            <li>连续的 safe 工具归入同一批</li>
+            <li>遇到 unsafe 工具立即截断，单独成批</li>
+            <li>结果是交替的 concurrent / serial 批次序列</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ 权限决策 ═══════════ -->
+    <section class="card section">
+      <div class="section-head">
+        <div>
+          <h2>权限决策的五层架构</h2>
+          <p>权限判断不是一个 if-else，而是五层逐级 fallback 的决策链。核心不变量：Hook 的 allow 不能越过 Rule 的 deny。</p>
+        </div>
+      </div>
+      <div class="perm-grid">
+        <div class="perm-card perm-allow">
+          <h3>Allow（允许执行）</h3>
+          <ul>
+            <li>匹配到 allow 规则（settings / project / CLI）</li>
+            <li>bypassPermissions 模式下所有工具通过</li>
+            <li>acceptEdits 模式下安全编辑操作通过</li>
+            <li>auto 模式下分类器评估为安全</li>
+            <li>用户在弹窗中确认允许</li>
+          </ul>
+          <p style="margin-top:10px;">允许后可以携带 <code>updatedInput</code>——允许的同时还能修改输入参数。</p>
+        </div>
+        <div class="perm-card perm-ask">
+          <h3>Ask（需要确认）</h3>
+          <ul>
+            <li>匹配到 ask 规则，触发用户弹窗</li>
+            <li>default 模式下大多数写操作</li>
+            <li>auto 模式下分类器不确定时回退</li>
+            <li>工具自身的 checkPermissions 返回 ask</li>
+            <li>可附带 suggestions 帮助用户理解选项</li>
+          </ul>
+          <p style="margin-top:10px;">弹窗可展示 <code>contentBlocks</code>，让用户看到即将执行的具体内容。</p>
+        </div>
+        <div class="perm-card perm-deny">
+          <h3>Deny（拒绝执行）</h3>
+          <ul>
+            <li>匹配到 deny 规则，直接拒绝</li>
+            <li>dontAsk 模式下 ask 自动降级为 deny</li>
+            <li>auto 模式下分类器判定为危险</li>
+            <li>安全检查（敏感路径访问）失败</li>
+            <li>连续拒绝次数超过阈值时回退交互</li>
+          </ul>
+          <p style="margin-top:10px;">拒绝时返回错误 tool_result，模型会看到拒绝原因并可能调整策略。</p>
+        </div>
+      </div>
+
+      <div class="notes" style="margin-top:14px;">
+        <div class="note">
+          <p><strong>安全不变量：</strong>PreToolUse hook 的 allow 决策不能越过 deny/ask 规则。
+          即使 hook 说允许，系统仍然会检查规则层。这确保了用户设定的安全边界不会被 hook 绕过。</p>
+        </div>
+        <div class="note">
+          <p><strong>决策来源追踪：</strong>每个 PermissionDecision 都携带 <code>decisionReason</code>，
+          记录是 rule / mode / hook / classifier / safetyCheck 哪一层做出的决策，便于调试和审计。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ ToolUseContext ═══════════ -->
+    <section class="card section">
+      <div class="section-head">
+        <div>
+          <h2>ToolUseContext：贯穿全链路的运行时上下文</h2>
+          <p>每个工具调用都能访问 ToolUseContext，它携带了从配置到状态、从消息到权限的全部运行时信息。</p>
+        </div>
+      </div>
+      <div class="metrics">
+        <div class="metric">
+          <strong>6 类</strong>
+          <h3>配置信息</h3>
+          <p>tools、commands、model、thinkingConfig、mcpClients、agentDefinitions</p>
+        </div>
+        <div class="metric">
+          <strong>4 类</strong>
+          <h3>控制回调</h3>
+          <p>abortController、setInProgressToolUseIDs、setResponseLength、requestPrompt</p>
+        </div>
+        <div class="metric">
+          <strong>3 类</strong>
+          <h3>状态管理</h3>
+          <p>getAppState / setAppState、messages、readFileState</p>
+        </div>
+        <div class="metric">
+          <strong>3 类</strong>
+          <h3>权限上下文</h3>
+          <p>toolPermissionContext、localDenialTracking、toolDecisions</p>
+        </div>
+      </div>
+      <div class="notes" style="margin-top:14px;">
+        <div class="note">
+          <p><strong>上下文修改器模式：</strong>工具执行后可以返回 <code>contextModifier</code>，
+          比如 Bash 工具改变了 cwd，会通过修改器更新 ToolUseContext。
+          并行批中这些修改器会排队等待，串行批中会立即生效。</p>
+        </div>
+        <div class="note">
+          <p><strong>进度追踪：</strong>工具可以通过 <code>onProgress</code> 回调发送流式进度消息，
+          让 REPL 在工具执行过程中就能展示中间状态（比如长时间运行的 Bash 命令输出）。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ 关键源码 ═══════════ -->
+    <section class="card section">
+      <div class="section-head">
+        <div>
+          <h2>关键源码入口</h2>
+          <p>按阅读顺序排列：先看编排全局观，再看单个执行流，最后看权限和 Hook 细节。</p>
+        </div>
+      </div>
+      <div class="code-grid">
+        <div class="code-card">
+          <h3>入口 · 编排调度</h3>
+          <p><code>runTools()</code> 是 query.ts 调用的唯一入口。它接收所有待执行的 tool_use 块，分批后逐批执行。</p>
+          <div class="code-links">
+            <a class="code-link" href="../restored-src/src/services/tools/toolOrchestration.ts">toolOrchestration.ts</a>
+            <a class="code-link" href="../restored-src/src/query.ts">query.ts:1382 (调用点)</a>
+          </div>
+        </div>
+        <div class="code-card">
+          <h3>单次执行 · 完整管线</h3>
+          <p><code>runToolUse()</code> 走完校验 → Hook → 权限 → 调用 → 后处理的全部路径，是最长的一个函数。</p>
+          <div class="code-links">
+            <a class="code-link" href="../restored-src/src/services/tools/toolExecution.ts">toolExecution.ts</a>
+          </div>
+        </div>
+        <div class="code-card">
+          <h3>工具定义 · 类型系统</h3>
+          <p><code>Tool</code> 类型定义了每个工具必须实现的接口：call、description、inputSchema、checkPermissions 等。</p>
+          <div class="code-links">
+            <a class="code-link" href="../restored-src/src/Tool.ts">Tool.ts</a>
+          </div>
+        </div>
+        <div class="code-card">
+          <h3>Hooks · 可扩展拦截</h3>
+          <p>PreToolUse / PostToolUse / PostToolUseFailure 三类 hook 在执行前后提供完整的拦截和转换能力。</p>
+          <div class="code-links">
+            <a class="code-link" href="../restored-src/src/services/tools/toolHooks.ts">toolHooks.ts (651 行)</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ Footer ═══════════ -->
+    <section class="footer-grid">
+      <article class="card footer-card">
+        <h2>阅读建议</h2>
+        <p>按这个顺序读源码，从全局到局部，逐步深入。</p>
+        <div class="timeline">
+          <div class="flow-step" data-step="1" style="padding-left:72px;">
+            <h3>先读 toolOrchestration.ts（189 行）</h3>
+            <p>最短的文件，但决定了整体架构。理解 runTools → partitionToolCalls → 并行/串行分支。</p>
+          </div>
+          <div class="flow-step" data-step="2" style="padding-left:72px;">
+            <h3>再读 Tool.ts 的 Tool 类型定义</h3>
+            <p>理解每个工具需要实现哪些方法：call、checkPermissions、isConcurrencySafe、isReadOnly、isDestructive。</p>
+          </div>
+          <div class="flow-step" data-step="3" style="padding-left:72px;">
+            <h3>然后读 toolExecution.ts 的 runToolUse</h3>
+            <p>1745 行很长，但核心路径是 checkPermissionsAndCallTool。跳过错误处理先看主干。</p>
+          </div>
+          <div class="flow-step" data-step="4" style="padding-left:72px;">
+            <h3>最后读 permissions.ts + toolHooks.ts</h3>
+            <p>权限和 Hook 是横切关注点，理解完主干后再看它们如何拦截和转换。</p>
+          </div>
+        </div>
+      </article>
+      <article class="card footer-card">
+        <h2>教学要点</h2>
+        <p>给别人讲工具执行时，优先讲清这 4 个事实。</p>
+        <div class="notes" style="grid-template-columns: 1fr;">
+          <div class="note">
+            <p>工具不是 REPL 直接调用的函数，而是模型在采样过程中发出的 <code>tool_use</code> 指令，
+            经过编排 → 校验 → 权限 → 执行 → 后处理的完整管线才落地。</p>
+          </div>
+          <div class="note">
+            <p>并发是有条件的。只读工具可以并行（最多 10 个），写操作必须串行，
+            并且上下文修改器要在正确的时机应用。</p>
+          </div>
+          <div class="note">
+            <p>权限是多层的，不是一个开关。规则、模式、Hook、分类器、用户确认五层逐级 fallback，
+            而且 Hook 的 allow 不能越过规则的 deny——这是安全不变量。</p>
+          </div>
+          <div class="note">
+            <p>工具结果不是终点。tool_result 回灌到消息链后，query 继续下一轮采样。
+            一次用户提交可能经历多轮 tool_use → tool_result 闭环。</p>
+          </div>
+        </div>
+      </article>
+    </section>
+  </div>
+
+  <script>
+    // ═══════════ 7 步交互式流程数据 ═══════════
+    const flowSteps = [
+      {
+        title: "query.ts 调用 runTools() 进入编排层",
+        short: "query 主循环发现 assistant 返回了 tool_use 块，调用 runTools 启动工具执行支路。",
+        detail: "query.ts 的主循环在流式接收 assistant 事件时，如果发现消息中包含 tool_use content block，不会结束当前 turn，而是把所有待执行的 tool_use 块收集起来，连同 assistantMessages、canUseTool 函数和 toolUseContext 一起传给 runTools()。这是从「模型推理」到「本地执行」的分界线。",
+        io: { input: "tool_use blocks + assistantMessages + canUseTool + toolUseContext", output: "AsyncGenerator<MessageUpdate> 流式产出执行结果" },
+        keyPoints: ["runTools 是 async generator，不是一次性返回", "query 循环在等待 runTools 完成期间暂停采样", "toolUseContext 携带了完整的运行时环境"]
+      },
+      {
+        title: "partitionToolCalls() 分批决定并发策略",
+        short: "按 isConcurrencySafe 属性把工具列表切分成并行批和串行批。",
+        detail: "编排层的第一件事不是执行，而是分析。partitionToolCalls 遍历所有 tool_use 块，调用每个工具的 isConcurrencySafe() 方法（该方法可以根据具体输入动态判断）。连续的 safe 工具被归入同一个并行批（最多 10 个），遇到 unsafe 工具时立即截断形成新批次。最终得到一个交替的 Batch[] 序列。",
+        io: { input: "ToolUseBlock[] 待执行工具列表", output: "Batch[] — 每个 batch 标记 isConcurrencySafe + 包含的工具块" },
+        keyPoints: ["isConcurrencySafe 是按输入动态判断的，不只看工具类型", "并发上限由 CLAUDE_CODE_MAX_TOOL_USE_CONCURRENCY 环境变量控制（默认 10）", "分区结果决定了后续是走 runToolsConcurrently 还是 runToolsSerially"]
+      },
+      {
+        title: "执行层启动：输入校验 + validateInput",
+        short: "进入 runToolUse 后，首先用 Zod schema 校验输入格式，再调用工具自定义校验。",
+        detail: "每个工具定义了 inputSchema（Zod schema），runToolUse 先做 safeParse。如果格式不对，直接返回错误 tool_result，不会进入后续流程。格式通过后，还会调用工具的 validateInput() 做语义级别的校验（比如检查文件路径是否合理）。这是第一道防线，发生在 Hook 和权限检查之前。",
+        io: { input: "tool_use block（包含 name + input JSON）", output: "校验通过的 parsedInput 或错误 tool_result" },
+        keyPoints: ["Zod schema 保证结构正确", "validateInput 做语义校验（如路径、范围检查）", "校验失败直接短路，不进入 Hook 和权限流程"]
+      },
+      {
+        title: "PreToolUse Hooks 介入拦截",
+        short: "用户配置的 PreToolUse hooks 可以修改输入、做出权限决策、追加上下文甚至阻止执行。",
+        detail: "Hook 系统是工具执行中最灵活的扩展点。executePreToolHooks 会运行所有匹配当前工具的 PreToolUse hook，每个 hook 可以产出多种类型的结果：message（展示消息）、hookPermissionResult（权限决策）、hookUpdatedInput（修改输入）、preventContinuation（阻止后续 turn）、additionalContext（追加上下文消息）、stop（终止 hook 处理）。所有结果会被聚合后传入权限决策阶段。",
+        io: { input: "工具名 + parsedInput + toolUseContext", output: "hook 消息 + 权限建议 + 可能修改过的输入 + 追加上下文" },
+        keyPoints: ["Hook 的 allow 不能越过规则层的 deny——这是安全不变量", "Hook 可以修改输入参数，但修改会被明确标记为 hookUpdatedInput", "Hook 还可以追加 additionalContext，影响后续模型推理"]
+      },
+      {
+        title: "权限五层决策：规则 → 模式 → Hook → 分类器 → 交互",
+        short: "resolveHookPermissionDecision 和 canUseTool 联合完成最终的 allow / ask / deny 判定。",
+        detail: "权限决策分五层逐级 fallback。第一层：规则匹配（settings / project / CLI 中定义的 allow / deny / ask 规则）。第二层：权限模式（default / auto / acceptEdits / bypassPermissions / dontAsk）。第三层：Hook 决策（PreToolUse hook 的权限建议）。第四层：AI 分类器（auto 模式下评估操作风险）。第五层：用户交互（弹窗确认）。每层都可以终止判断，后续层不再执行。结果是一个带 behavior（allow/ask/deny）和 decisionReason 的 PermissionDecision 对象。",
+        io: { input: "hook 权限建议 + 工具信息 + 当前权限模式", output: "PermissionDecision { behavior, decisionReason, updatedInput? }" },
+        keyPoints: ["deny 决策会导致返回错误 tool_result，模型能看到拒绝原因", "ask 决策触发 REPL 弹窗，用户可以允许 / 拒绝 / 修改后允许", "auto 模式下连续拒绝超过阈值会自动回退到交互模式"]
+      },
+      {
+        title: "tool.call() 实际执行 + 进度回调",
+        short: "权限通过后，调用工具的 call 方法执行真正的本地操作。",
+        detail: "这是真正执行文件读写、命令运行、网络请求等本地操作的地方。tool.call 接收校验过的输入、toolUseContext、canUseTool 函数（工具内部可能需要递归检查权限）、当前的 assistantMessage 和 onProgress 回调。工具可以通过 onProgress 发送流式进度消息（比如长时间运行的 Bash 命令的中间输出），这些消息会实时展示在 REPL 中。执行完成后返回 ToolResult，包含数据、可能的新消息和上下文修改器。",
+        io: { input: "callInput + ToolUseContext + canUseTool + assistantMessage + onProgress", output: "ToolResult { data, newMessages?, contextModifier? }" },
+        keyPoints: ["onProgress 让 REPL 能在工具执行过程中展示中间状态", "contextModifier 可以修改 ToolUseContext（如 Bash 改变 cwd）", "工具内部可以递归调用 canUseTool 做子操作的权限检查"]
+      },
+      {
+        title: "PostToolUse Hooks + 结果映射 → 产出 tool_result",
+        short: "执行结果经过后处理 hooks、结果映射和预算检查，最终变成可回灌的 tool_result 消息。",
+        detail: "执行完成后进入收尾阶段。首先运行 PostToolUse hooks，它们可以转换结果（特别是 MCP 工具的输出修改）。然后调用 tool.mapToolResultToToolResultBlockParam 把工具特定的结果格式转换成 API 标准的 tool_result content block。最后经过 processToolResultBlock 做结果预算检查（太长的结果可能被截断）。整个产出通过 MessageUpdateLazy 流式 yield 给编排层，编排层再汇聚所有批次的结果后 yield 给 query 循环。",
+        io: { input: "ToolResult + tool 定义 + toolUseContext", output: "MessageUpdateLazy[] — 包含 tool_result 消息 + 可能的 contextModifier" },
+        keyPoints: ["PostToolUse hooks 可以修改 MCP 工具的输出", "结果映射统一了所有工具的输出格式", "结果预算防止过大的 tool_result 撑爆上下文窗口"]
+      }
+    ];
+
+    // ═══════════ 交互状态管理 ═══════════
+    let current = 0;
+    let playing = false;
+    let timer = null;
+    const speed = 2200;
+
+    const timelineEl = document.getElementById("timeline");
+    const detailEl = document.getElementById("detailPanel");
+    const progressText = document.getElementById("progressText");
+    const progressBar = document.getElementById("progressBar");
+    const playBtn = document.getElementById("playBtn");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const resetBtn = document.getElementById("resetBtn");
+
+    function buildTimeline() {
+      timelineEl.innerHTML = "";
+      flowSteps.forEach((s, i) => {
+        const el = document.createElement("div");
+        el.className = "flow-step";
+        el.dataset.step = i + 1;
+        if (i < current) el.classList.add("done");
+        else if (i === current) el.classList.add("active");
+        else el.classList.add("upcoming");
+        el.innerHTML = `<h3>${s.title}</h3><p>${s.short}</p>`;
+        el.addEventListener("click", () => { stopAuto(); current = i; render(); });
+        timelineEl.appendChild(el);
+      });
+    }
+
+    function buildDetail() {
+      const s = flowSteps[current];
+      detailEl.innerHTML = `
+        <h3>步骤 ${current + 1}：${s.title}</h3>
+        <p>${s.detail}</p>
+        <div class="detail-grid">
+          <div class="detail-box">
+            <h4>输入 / 输出</h4>
+            <p><strong>输入：</strong>${s.io.input}</p>
+            <p style="margin-top:8px;"><strong>输出：</strong>${s.io.output}</p>
+          </div>
+          <div class="detail-box">
+            <h4>关键要点</h4>
+            <ul>${s.keyPoints.map(k => `<li>${k}</li>`).join("")}</ul>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderProgress() {
+      progressText.textContent = `步骤 ${current + 1} / ${flowSteps.length}`;
+      progressBar.style.width = `${((current + 1) / flowSteps.length) * 100}%`;
+      playBtn.textContent = playing ? "暂停" : "自动播放";
+    }
+
+    function render() {
+      buildTimeline();
+      buildDetail();
+      renderProgress();
+    }
+
+    function stopAuto() {
+      playing = false;
+      if (timer) { clearInterval(timer); timer = null; }
+      renderProgress();
+    }
+
+    function nextStep() {
+      if (current < flowSteps.length - 1) current++;
+      else stopAuto();
+      render();
+    }
+
+    function prevStep() {
+      if (current > 0) current--;
+      render();
+    }
+
+    playBtn.addEventListener("click", () => {
+      if (playing) { stopAuto(); return; }
+      playing = true;
+      renderProgress();
+      timer = setInterval(() => {
+        if (current >= flowSteps.length - 1) { stopAuto(); return; }
+        nextStep();
+      }, speed);
+    });
+
+    prevBtn.addEventListener("click", () => { stopAuto(); prevStep(); });
+    nextBtn.addEventListener("click", () => { stopAuto(); nextStep(); });
+    resetBtn.addEventListener("click", () => { stopAuto(); current = 0; render(); });
+
+    document.addEventListener("keydown", e => {
+      if (e.key === "ArrowRight") { stopAuto(); nextStep(); }
+      if (e.key === "ArrowLeft") { stopAuto(); prevStep(); }
+      if (e.key === " " || e.code === "Space") {
+        e.preventDefault();
+        playing ? stopAuto() : playBtn.click();
+      }
+      if (e.key.toLowerCase() === "r") { stopAuto(); current = 0; render(); }
+    });
+
+    render();
+
+    // ═══════════ 序列图绘制 ═══════════
+    (function drawSequenceDiagram() {
+      const canvas = document.getElementById("seqCanvas");
+      const container = canvas.closest('.section');
+      const dpr = window.devicePixelRatio || 1;
+      const W = Math.max(900, container.clientWidth - 44);
+      const H = 520;
+      canvas.width = W * dpr;
+      canvas.height = H * dpr;
+      canvas.style.width = W + "px";
+      canvas.style.height = H + "px";
+      const ctx = canvas.getContext("2d");
+      ctx.scale(dpr, dpr);
+
+      // 参与者 — 按容器宽度自适应分布
+      const pad = 70;
+      const gap = (W - pad * 2) / 4;
+      const actors = [
+        { label: "query.ts", x: pad },
+        { label: "toolOrchestration", x: pad + gap },
+        { label: "toolExecution", x: pad + gap * 2 },
+        { label: "permissions", x: pad + gap * 3 },
+        { label: "tool.call()", x: pad + gap * 4 }
+      ];
+
+      const topY = 50;
+      const bottomY = 490;
+
+      // 绘制参与者
+      ctx.font = "bold 13px 'Segoe UI', sans-serif";
+      ctx.textAlign = "center";
+      actors.forEach(a => {
+        ctx.fillStyle = "#0f766e";
+        // roundRect polyfill
+        const rx = a.x - 58, ry = topY - 30, rw = 116, rh = 32, rr = 10;
+        ctx.beginPath();
+        ctx.moveTo(rx + rr, ry);
+        ctx.lineTo(rx + rw - rr, ry);
+        ctx.arcTo(rx + rw, ry, rx + rw, ry + rr, rr);
+        ctx.lineTo(rx + rw, ry + rh - rr);
+        ctx.arcTo(rx + rw, ry + rh, rx + rw - rr, ry + rh, rr);
+        ctx.lineTo(rx + rr, ry + rh);
+        ctx.arcTo(rx, ry + rh, rx, ry + rh - rr, rr);
+        ctx.lineTo(rx, ry + rr);
+        ctx.arcTo(rx, ry, rx + rr, ry, rr);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = "#fff";
+        ctx.fillText(a.label, a.x, topY - 9);
+
+        // 生命线
+        ctx.strokeStyle = "rgba(31, 43, 49, 0.18)";
+        ctx.setLineDash([6, 4]);
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(a.x, topY + 6);
+        ctx.lineTo(a.x, bottomY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      });
+
+      // 消息箭头
+      const msgs = [
+        { from: 0, to: 1, y: 90, label: "runTools(tool_use[])", color: "#0f766e" },
+        { from: 1, to: 1, y: 125, label: "partitionToolCalls()", color: "#667179", self: true },
+        { from: 1, to: 2, y: 165, label: "runToolUse(block)", color: "#c96a27" },
+        { from: 2, to: 2, y: 200, label: "Zod parse + validateInput", color: "#667179", self: true },
+        { from: 2, to: 2, y: 235, label: "PreToolUse hooks", color: "#667179", self: true },
+        { from: 2, to: 3, y: 270, label: "canUseTool()", color: "#b7791f" },
+        { from: 3, to: 2, y: 305, label: "PermissionDecision", color: "#2f855a", dashed: true },
+        { from: 2, to: 4, y: 345, label: "tool.call(input, ctx)", color: "#c96a27" },
+        { from: 4, to: 2, y: 385, label: "ToolResult { data }", color: "#2f855a", dashed: true },
+        { from: 2, to: 2, y: 415, label: "PostToolUse hooks + 结果映射", color: "#667179", self: true },
+        { from: 2, to: 1, y: 445, label: "MessageUpdateLazy[]", color: "#2f855a", dashed: true },
+        { from: 1, to: 0, y: 475, label: "MessageUpdate (tool_result)", color: "#2f855a", dashed: true }
+      ];
+
+      ctx.font = "12px 'Segoe UI', sans-serif";
+      ctx.textAlign = "left";
+
+      msgs.forEach(m => {
+        const x1 = actors[m.from].x;
+        const x2 = actors[m.to].x;
+
+        ctx.strokeStyle = m.color;
+        ctx.fillStyle = m.color;
+        ctx.lineWidth = 1.8;
+
+        if (m.self) {
+          // 自调用弧线
+          const r = 18;
+          ctx.beginPath();
+          ctx.moveTo(x1, m.y);
+          ctx.lineTo(x1 + 40, m.y);
+          ctx.lineTo(x1 + 40, m.y + 18);
+          ctx.lineTo(x1, m.y + 18);
+          ctx.stroke();
+          // 箭头
+          ctx.beginPath();
+          ctx.moveTo(x1, m.y + 18);
+          ctx.lineTo(x1 + 7, m.y + 14);
+          ctx.lineTo(x1 + 7, m.y + 22);
+          ctx.closePath();
+          ctx.fill();
+          // 标签
+          ctx.fillStyle = m.color;
+          ctx.fillText(m.label, x1 + 46, m.y + 12);
+        } else {
+          if (m.dashed) {
+            ctx.setLineDash([5, 3]);
+          }
+          ctx.beginPath();
+          ctx.moveTo(x1, m.y);
+          ctx.lineTo(x2, m.y);
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          // 箭头
+          const dir = x2 > x1 ? 1 : -1;
+          ctx.beginPath();
+          ctx.moveTo(x2, m.y);
+          ctx.lineTo(x2 - dir * 9, m.y - 5);
+          ctx.lineTo(x2 - dir * 9, m.y + 5);
+          ctx.closePath();
+          ctx.fill();
+
+          // 标签
+          const midX = (x1 + x2) / 2;
+          ctx.textAlign = "center";
+          ctx.fillStyle = m.color;
+          ctx.fillText(m.label, midX, m.y - 8);
+          ctx.textAlign = "left";
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
