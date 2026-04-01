@@ -1,9 +1,64 @@
-<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36" version="29.6.4">
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36" version="29.6.6">
   <diagram id="claude-code-arch" name="Claude Code Architecture">
-    <mxGraphModel dx="3178" dy="1697" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2400" pageHeight="1800" math="0" shadow="0">
+    <mxGraphModel dx="2175" dy="1161" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2400" pageHeight="1800" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
+        <mxCell id="e4" edge="1" parent="1" source="registry-note" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#4caf50;dashed=1;dashPattern=5 5;" target="commands-reg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="registry-note" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#4caf50;dashed=1;dashPattern=5 5;" target="tools-reg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="mcp-node" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#0277bd;" target="tools-reg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="skills-node" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#d79b00;" target="commands-reg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="plugins-node" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#d79b00;" target="commands-reg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="mcp-node" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#0277bd;dashed=1;dashPattern=5 5;" target="commands-reg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e33" edge="1" parent="1" source="external-extensions" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#82b366;dashed=1;dashPattern=5 5;" target="commands-reg">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1690" y="452" />
+              <mxPoint x="240" y="452" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="appstate-provider" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#d6b656;" target="repl-screen">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e26" edge="1" parent="1" source="tool-orch" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#b85450;" target="edit-tool">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e20" edge="1" parent="1" source="process-input" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=3;strokeColor=#9c27b0;" target="query-node">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="620" y="1215" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e32" edge="1" parent="1" source="hooks-node" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#1565c0;dashed=1;dashPattern=5 5;" target="tool-exec">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="830" y="1215" />
+              <mxPoint x="1480" y="1215" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e27" edge="1" parent="1" source="messages-node" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=3;strokeColor=#9c27b0;" target="repl-screen">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="620" y="790" />
+              <mxPoint x="1220" y="790" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
         <mxCell id="e30" edge="1" parent="1" source="session-restore" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#0277bd;" target="repl-screen">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
@@ -15,7 +70,7 @@
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="570" y="706" />
-              <mxPoint x="1020" y="706" />
+              <mxPoint x="1220" y="706" />
             </Array>
           </mxGeometry>
         </mxCell>
@@ -23,7 +78,7 @@
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="240" y="706" />
-              <mxPoint x="1020" y="706" />
+              <mxPoint x="1220" y="706" />
             </Array>
           </mxGeometry>
         </mxCell>
@@ -85,16 +140,16 @@
           <mxGeometry height="32" width="280" x="60" y="595" as="geometry" />
         </mxCell>
         <mxCell id="appstate-store" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" value="state/AppStateStore.ts&#xa;全局会话状态模型&#xa;settings / permissions / mcp / plugins / tasks / UI state" vertex="1">
-          <mxGeometry height="92" width="340" x="90" y="660" as="geometry" />
+          <mxGeometry height="92" width="300" x="90" y="660" as="geometry" />
         </mxCell>
         <mxCell id="appstate-provider" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" value="state/AppState.tsx&#xa;Provider + useAppState + useSetAppState" vertex="1">
-          <mxGeometry height="92" width="280" x="480" y="660" as="geometry" />
+          <mxGeometry height="92" width="260" x="430" y="660" as="geometry" />
         </mxCell>
         <mxCell id="onchange-state" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" value="state/onChangeAppState.ts&#xa;状态变化副作用同步&#xa;配置 / 会话元数据 / 权限模式" vertex="1">
-          <mxGeometry height="92" width="300" x="810" y="660" as="geometry" />
+          <mxGeometry height="92" width="270" x="730" y="660" as="geometry" />
         </mxCell>
         <mxCell id="repl-screen" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" value="screens/REPL.tsx&#xa;前台控制台&#xa;状态消费 + UI 渲染 + onQuery + 队列消费" vertex="1">
-          <mxGeometry height="92" width="320" x="860" y="660" as="geometry" />
+          <mxGeometry height="92" width="320" x="1060" y="660" as="geometry" />
         </mxCell>
         <mxCell id="lane4-bg" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;opacity=20;" value="" vertex="1">
           <mxGeometry height="220" width="1740" x="40" y="830" as="geometry" />
@@ -127,13 +182,13 @@
           <mxGeometry height="100" width="300" x="470" y="1165" as="geometry" />
         </mxCell>
         <mxCell id="tool-contract" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9c27b0;fontSize=12;" value="Tool.ts&#xa;工具公共契约&#xa;schema / permission / progress / render / context" vertex="1">
-          <mxGeometry height="100" width="280" x="1240" y="1165" as="geometry" />
+          <mxGeometry height="100" width="240" x="1220" y="1165" as="geometry" />
         </mxCell>
         <mxCell id="tool-exec" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;" value="services/tools/toolExecution.ts&#xa;单次工具调用流水线&#xa;validate → permission → hooks → call → tool_result" vertex="1">
-          <mxGeometry height="100" width="300" x="1410" y="1165" as="geometry" />
+          <mxGeometry height="100" width="280" x="1490" y="1165" as="geometry" />
         </mxCell>
         <mxCell id="tool-orch" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;" value="toolOrchestration.ts + StreamingToolExecutor.ts&#xa;串行 / 并发 / streaming 工具编排" vertex="1">
-          <mxGeometry height="52" width="300" x="1410" y="1290" as="geometry" />
+          <mxGeometry height="52" width="280" x="1490" y="1290" as="geometry" />
         </mxCell>
         <mxCell id="bash-tool" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;" value="BashTool&#xa;复杂 shell 工具&#xa;安全、sandbox、progress、background" vertex="1">
           <mxGeometry height="52" width="240" x="1140" y="1290" as="geometry" />
@@ -186,37 +241,12 @@
         <mxCell id="e3" edge="1" parent="1" source="repl-launcher" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=3;strokeColor=#2E5090;" target="repl-screen">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="1020" y="560" />
+              <mxPoint x="1220" y="560" />
             </Array>
           </mxGeometry>
-        </mxCell>
-        <mxCell id="e4" edge="1" parent="1" source="registry-note" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#4caf50;dashed=1;dashPattern=5 5;" target="commands-reg">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e5" edge="1" parent="1" source="registry-note" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#4caf50;dashed=1;dashPattern=5 5;" target="tools-reg">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e6" edge="1" parent="1" source="skills-node" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#d79b00;" target="commands-reg">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e7" edge="1" parent="1" source="plugins-node" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#d79b00;" target="commands-reg">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e8" edge="1" parent="1" source="mcp-node" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#0277bd;" target="tools-reg">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e9" edge="1" parent="1" source="mcp-node" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#0277bd;dashed=1;dashPattern=5 5;" target="commands-reg">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e13" edge="1" parent="1" source="appstate-provider" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#d6b656;" target="repl-screen">
-          <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="e14" edge="1" parent="1" source="repl-screen" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#d6b656;dashed=1;dashPattern=5 5;" target="onchange-state">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="1240" y="706" />
-            </Array>
-          </mxGeometry>
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="e15" edge="1" parent="1" source="repl-screen" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=3;strokeColor=#9673a6;" target="prompt-submit">
           <mxGeometry relative="1" as="geometry" />
@@ -246,13 +276,6 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="e20" edge="1" parent="1" source="process-input" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=3;strokeColor=#9c27b0;" target="query-node">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="620" y="1215" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
         <mxCell id="e21" edge="1" parent="1" source="query-node" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#9c27b0;" target="messages-node">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
@@ -263,7 +286,7 @@
         <mxCell id="e22" edge="1" parent="1" source="query-node" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#9c27b0;" target="tool-contract">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="1220" y="1215" />
+              <mxPoint x="1200" y="1215" />
             </Array>
           </mxGeometry>
         </mxCell>
@@ -273,23 +296,12 @@
         <mxCell id="e24" edge="1" parent="1" source="tool-exec" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#d79b00;" target="tool-orch">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="1560" y="1278" />
+              <mxPoint x="1630" y="1278" />
             </Array>
           </mxGeometry>
         </mxCell>
         <mxCell id="e25" edge="1" parent="1" source="tool-orch" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#b85450;" target="bash-tool">
           <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e26" edge="1" parent="1" source="tool-orch" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#b85450;" target="edit-tool">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e27" edge="1" parent="1" source="messages-node" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=3;strokeColor=#9c27b0;" target="repl-screen">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="620" y="790" />
-              <mxPoint x="1020" y="790" />
-            </Array>
-          </mxGeometry>
         </mxCell>
         <mxCell id="e28" edge="1" parent="1" source="query-node" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#0277bd;dashed=1;dashPattern=5 5;" target="session-store">
           <mxGeometry relative="1" as="geometry" />
@@ -305,22 +317,6 @@
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="820" y="1511" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="e32" edge="1" parent="1" source="hooks-node" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#1565c0;dashed=1;dashPattern=5 5;" target="tool-exec">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="830" y="1215" />
-              <mxPoint x="1400" y="1215" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="e33" edge="1" parent="1" source="external-extensions" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#82b366;dashed=1;dashPattern=5 5;" target="commands-reg">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="1690" y="452" />
-              <mxPoint x="240" y="452" />
             </Array>
           </mxGeometry>
         </mxCell>
