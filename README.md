@@ -92,3 +92,15 @@ extract-sources.js        source map 提取脚本
 - 本仓库仅用于技术学习、研究与架构分析
 - 请勿将本仓库内容作为官方源码或官方实现说明引用
 - 如有侵权或不适宜公开的内容，请提交 issue 或联系删除
+## GitHub Actions
+
+This repository includes two GitHub Actions workflows for maintenance:
+
+- `CI`: runs on pushes to `main` and on pull requests. It verifies the key repository files, validates `package/package.json`, and checks that `node package/cli.js --help` works.
+- `Release`: runs manually through `workflow_dispatch`. It creates the requested tag if needed, builds a zip snapshot of the repository, and publishes a GitHub Release with that archive attached.
+
+Recommended release inputs:
+
+- `tag`: a version-like tag such as `v2.1.88`
+- `release_name`: a readable title such as `claude-code-sourcemap v2.1.88`
+- `prerelease`: set to `true` only for preview snapshots

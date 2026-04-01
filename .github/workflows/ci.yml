@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Verify repository files
+        run: |
+          test -f README.md
+          test -f CONTRIBUTING.md
+          test -f package/package.json
+          test -f package/cli.js
+          test -f package/cli.js.map
+          test -d docs
+          test -d restored-src
+
+      - name: Validate package metadata
+        run: node -e "JSON.parse(require('node:fs').readFileSync('package/package.json', 'utf8')); console.log('package/package.json OK')"
+
+      - name: Verify CLI entrypoint
+        run: node package/cli.js --help

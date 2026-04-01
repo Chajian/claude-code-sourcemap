@@ -1,0 +1,67 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to create, for example v2.1.88
+        required: true
+      release_name:
+        description: Release title shown on GitHub
+        required: true
+      prerelease:
+        description: Mark this release as a prerelease
+        required: false
+        default: "false"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Verify CLI entrypoint
+        run: node package/cli.js --help
+
+      - name: Create release archive
+        shell: bash
+        run: |
+          mkdir -p dist
+          zip -r "dist/claude-code-sourcemap-${{ github.event.inputs.tag }}.zip" \
+            README.md \
+            CONTRIBUTING.md \
+            extract-sources.js \
+            docs \
+            package \
+            restored-src
+
+      - name: Create Git tag if missing
+        shell: bash
+        run: |
+          if git rev-parse "${{ github.event.inputs.tag }}" >/dev/null 2>&1; then
+            echo "Tag already exists: ${{ github.event.inputs.tag }}"
+          else
+            git tag "${{ github.event.inputs.tag }}"
+            git push origin "${{ github.event.inputs.tag }}"
+          fi
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.tag }}
+          name: ${{ github.event.inputs.release_name }}
+          prerelease: ${{ github.event.inputs.prerelease == 'true' }}
+          files: dist/claude-code-sourcemap-${{ github.event.inputs.tag }}.zip
+          generate_release_notes: true
