@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>/buddy 指令专栏 - Claude Code Sourcemap</title>
+  <style>
+    :root {
+      --primary: #2196f3;
+      --secondary: #ff9800;
+      --success: #4caf50;
+      --danger: #f44336;
+      --warning: #ffc107;
+      --gray-100: #f5f5f5;
+      --gray-200: #eceff1;
+      --gray-300: #d7dde2;
+      --gray-500: #78909c;
+      --gray-700: #455a64;
+      --gray-900: #1f2a30;
+      --flow-start: #66bb6a;
+      --flow-active: #42a5f5;
+      --flow-decision: #ffa726;
+      --flow-end: #ef5350;
+      --flow-pending: #bdbdbd;
+      --gradient-blue: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --gradient-green: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      --gradient-orange: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      --bg: linear-gradient(180deg, #f8fbff 0%, #eef4f8 100%);
+      --panel: rgba(255, 255, 255, 0.9);
+      --shadow: 0 16px 40px rgba(31, 42, 48, 0.12);
+      --radius: 18px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--gray-900);
+      min-height: 100vh;
+    }
+
+    .page {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .hero,
+    .card {
+      background: var(--panel);
+      border: 1px solid rgba(215, 221, 226, 0.9);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+
+    .hero {
+      padding: 28px;
+      overflow: hidden;
+      position: relative;
+      margin-bottom: 18px;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -70px -70px auto;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(102, 126, 234, 0.22), transparent 68%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(33, 150, 243, 0.1);
+      color: var(--gray-700);
+      font-size: 13px;
+    }
+
+    .title {
+      font-size: clamp(34px, 5vw, 56px);
+      line-height: 1.06;
+      margin: 16px 0 12px;
+      background: var(--gradient-blue);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      max-width: 980px;
+      font-size: 16px;
+      line-height: 1.8;
+      color: var(--gray-700);
+    }
+
+    .hero-grid {
+      margin-top: 22px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .summary {
+      border: 1px solid rgba(33, 150, 243, 0.1);
+      border-radius: 16px;
+      background: rgba(33, 150, 243, 0.07);
+      padding: 14px;
+      min-height: 108px;
+    }
+
+    .summary:nth-child(2n) {
+      background: rgba(255, 152, 0, 0.08);
+      border-color: rgba(255, 152, 0, 0.12);
+    }
+
+    .summary h3 {
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .summary p {
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr) 360px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .sidebar,
+    .main,
+    .detail {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .card {
+      padding: 18px;
+    }
+
+    .card h2 {
+      font-size: 20px;
+      margin-bottom: 12px;
+    }
+
+    .card h3 {
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    .muted {
+      color: var(--gray-700);
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 15px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 999px;
+      background: var(--primary);
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+
+    .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+    .btn.secondary {
+      background: #90a4ae;
+    }
+
+    .btn.ghost {
+      background: #ffffff;
+      color: var(--gray-900);
+      border: 1px solid var(--gray-300);
+    }
+
+    .progress {
+      display: grid;
+      gap: 8px;
+    }
+
+    progress {
+      width: 100%;
+      height: 12px;
+    }
+
+    .speed {
+      padding: 8px 10px;
+      border: 1px solid var(--gray-300);
+      border-radius: 999px;
+      background: white;
+    }
+
+    .step-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .step-item {
+      border: 1px solid var(--gray-300);
+      border-radius: 14px;
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      background: white;
+    }
+
+    .step-item.active {
+      border-color: var(--flow-active);
+      background: rgba(66, 165, 245, 0.08);
+      transform: translateX(4px);
+    }
+
+    .step-item small {
+      display: block;
+      margin-top: 6px;
+      color: var(--gray-700);
+      line-height: 1.5;
+    }
+
+    .flow {
+      display: grid;
+      gap: 14px;
+    }
+
+    .flow-node {
+      border: 1px solid var(--gray-300);
+      border-radius: 16px;
+      background: white;
+      padding: 16px;
+      transition: all 0.35s ease;
+      opacity: 0.45;
+      transform: scale(0.985);
+    }
+
+    .flow-node.reached {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .flow-node.active {
+      border-color: var(--flow-active);
+      box-shadow: 0 0 0 4px rgba(66, 165, 245, 0.12);
+      background: linear-gradient(180deg, rgba(66, 165, 245, 0.08), rgba(255, 255, 255, 0.98));
+    }
+
+    .flow-node.start.active { border-color: var(--flow-start); box-shadow: 0 0 0 4px rgba(102, 187, 106, 0.12); }
+    .flow-node.decision.active { border-color: var(--flow-decision); box-shadow: 0 0 0 4px rgba(255, 167, 38, 0.12); }
+    .flow-node.end.active { border-color: var(--flow-end); box-shadow: 0 0 0 4px rgba(239, 83, 80, 0.12); }
+
+    .node-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+      margin-bottom: 10px;
+    }
+
+    .node-tag {
+      display: inline-flex;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--gray-200);
+      font-size: 12px;
+      color: var(--gray-700);
+    }
+
+    .node-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .mini {
+      border-radius: 12px;
+      background: var(--gray-100);
+      padding: 10px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .arrow {
+      text-align: center;
+      color: var(--gray-500);
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .detail-block {
+      display: none;
+      animation: fadeUp 0.35s ease;
+    }
+
+    .detail-block.active {
+      display: block;
+    }
+
+    .detail-block p,
+    .detail-block li {
+      font-size: 14px;
+      line-height: 1.75;
+      color: var(--gray-700);
+    }
+
+    .detail-block ul {
+      padding-left: 18px;
+      margin-top: 10px;
+    }
+
+    .code-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .code-item {
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #0f1720;
+      color: #e3f2fd;
+      font-family: Consolas, Monaco, monospace;
+      font-size: 12px;
+      overflow-wrap: anywhere;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .stat {
+      border-radius: 14px;
+      padding: 12px;
+      background: linear-gradient(180deg, rgba(17, 153, 142, 0.09), rgba(255, 255, 255, 0.92));
+      border: 1px solid rgba(17, 153, 142, 0.12);
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 22px;
+      margin-bottom: 6px;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--gray-100);
+      font-size: 12px;
+      color: var(--gray-700);
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .footer-note {
+      margin-top: 18px;
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--gray-700);
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 1180px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 760px) {
+      .page { padding: 14px; }
+      .hero-grid, .stats, .node-grid { grid-template-columns: 1fr; }
+      .controls { justify-content: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <!-- 主题：/buddy 指令专栏；操作：左右键切换、空格播放、Home/End 跳转 -->
+  <div class="page">
+    <section class="hero">
+      <div class="eyebrow">交互式专栏 · /buddy command deep dive</div>
+      <h1 class="title">/buddy 指令不是一条普通命令</h1>
+      <p>
+        这页专门拆解本项目里 <code>/buddy</code> 的真实定位：它从 slash command 入口开始，
+        最终落到 companion 系统、消息上下文注入、REPL 底部 sprite、以及 turn 结束后的观察者 reaction。
+        你可以把它理解成“用一条命令点亮一套 companion 子系统”。
+      </p>
+      <div class="hero-grid">
+        <div class="summary">
+          <h3>注册位置</h3>
+          <p><code>src/commands.ts</code> 在 <code>feature('BUDDY')</code> 打开时装载内建命令。</p>
+        </div>
+        <div class="summary">
+          <h3>运行阶段</h3>
+          <p>命令入口主要落在 slash command 分流，但副作用会继续影响消息构造与 UI 渲染。</p>
+        </div>
+        <div class="summary">
+          <h3>持久化内容</h3>
+          <p>真正写入 config 的是 soul：名字、性格、hatchedAt；骨架外观按 userId 重算。</p>
+        </div>
+        <div class="summary">
+          <h3>系统角色</h3>
+          <p>既是 UI companion，也是会影响模型行为边界的上下文附件来源。</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="layout">
+      <aside class="sidebar">
+        <section class="card">
+          <h2>步骤导航</h2>
+          <div class="controls">
+            <button class="btn" id="prevBtn" onclick="prevStep()">上一段</button>
+            <button class="btn" id="playBtn" onclick="togglePlay()">播放</button>
+            <button class="btn" id="nextBtn" onclick="nextStep()">下一段</button>
+            <button class="btn ghost" onclick="goToStep(0)">重置</button>
+          </div>
+          <div class="progress">
+            <div id="stepIndicator">步骤 1 / 7</div>
+            <progress id="progressBar" min="0" max="6" value="0" oninput="goToStep(parseInt(this.value, 10))"></progress>
+            <select class="speed" onchange="setSpeed(this.value)">
+              <option value="2200">慢速</option>
+              <option value="1300" selected>正常</option>
+              <option value="700">快速</option>
+            </select>
+          </div>
+          <div class="legend">
+            <span><i class="dot" style="background: var(--flow-start);"></i>起点</span>
+            <span><i class="dot" style="background: var(--flow-active);"></i>处理中</span>
+            <span><i class="dot" style="background: var(--flow-decision);"></i>分流</span>
+            <span><i class="dot" style="background: var(--flow-end);"></i>落地</span>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>专栏目录</h2>
+          <div id="stepList" class="step-list"></div>
+        </section>
+
+        <section class="card">
+          <h2>结论先看</h2>
+          <div class="stats">
+            <div class="stat">
+              <strong>阶段 2</strong>
+              <span class="muted">命令入口最核心的位置：slash command 分流</span>
+            </div>
+            <div class="stat">
+              <strong>阶段 4+</strong>
+              <span class="muted">如果 companion 已存在，会把 intro attachment 注入模型上下文</span>
+            </div>
+            <div class="stat">
+              <strong>阶段 8</strong>
+              <span class="muted">sprite、bubble、hearts 最终在 REPL 渲染层出现</span>
+            </div>
+            <div class="stat">
+              <strong>长期驻留</strong>
+              <span class="muted">/buddy 不是一次性输出，而是点亮后长期存在的 companion 子系统</span>
+            </div>
+          </div>
+        </section>
+      </aside>
+
+      <main class="main">
+        <section class="card">
+          <h2>主链路</h2>
+          <div id="flowContainer" class="flow"></div>
+        </section>
+
+        <section class="card">
+          <h2>源码锚点</h2>
+          <div class="code-list" id="codeList"></div>
+          <p class="footer-note">
+            注意：当前仓库里 <code>commands/buddy/index.js</code> 没有被完整还原出来，所以这页专栏对“命令体内部实现”的部分采用了
+            “基于周边调用点和状态字段的严格推断”，但注册点、状态结构、上下文注入与 UI 渲染都能直接在源码中落锚。
+          </p>
+        </section>
+      </main>
+
+      <aside class="detail">
+        <section class="card">
+          <h2 id="detailTitle">步骤详情</h2>
+          <div id="detailContainer"></div>
+        </section>
+
+        <section class="card">
+          <h2>和 user-token-to-output-flow 的对应关系</h2>
+          <div id="mappingBox" class="muted" style="line-height: 1.8;"></div>
+        </section>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const steps = [
+      {
+        id: "entry",
+        title: "1. 入口曝光：/buddy 在输入层被看见",
+        tag: "起点",
+        kind: "start",
+        short: "彩虹 teaser、输入高亮、footer 入口先把 /buddy 变成显式能力。",
+        body: "在真正执行前，/buddy 已经在 PromptInput 层被多处接线。启动时若还没有 companion，会显示彩虹 /buddy teaser；输入过程中会高亮 /buddy trigger；footer 选中 companion 后按 Enter 直接提交 /buddy。",
+        bullets: [
+          "useBuddyNotification 在 teaser window 内展示彩虹 /buddy 提示。",
+          "findBuddyTriggerPositions 会在输入框内匹配 /buddy 并参与高亮。",
+          "PromptInput footer 里选中 companion 项时，会直接 onSubmit('/buddy')。"
+        ],
+        tokenPhase: "还没进入模型，也还没真正进入 query。这里只是把一个隐藏功能做成用户可触达入口。",
+        mapping: "对应 user-token-to-output-flow 的阶段 1，本地 UI 交互层。",
+        files: [
+          "restored-src/src/buddy/useBuddyNotification.tsx",
+          "restored-src/src/components/PromptInput/PromptInput.tsx"
+        ]
+      },
+      {
+        id: "dispatch",
+        title: "2. 命令注册与 slash command 分流",
+        tag: "分流",
+        kind: "decision",
+        short: "/buddy 先是一个内建命令，再由 slash command 路径决定如何执行。",
+        body: "commands.ts 在 BUDDY feature 打开时把 buddy 命令装进内建命令数组。之后用户输入 /buddy，会像其他 slash command 一样走 handlePromptSubmit -> processUserInput -> processSlashCommand 这条本地命令分流路径。",
+        bullets: [
+          "buddy 命令通过 feature('BUDDY') 条件注入。",
+          "slash command 不是普通 prompt；它可能本地执行，也可能生成后续消息。",
+          "因此 /buddy 的第一归属是命令系统，而不是 query 主循环。"
+        ],
+        tokenPhase: "仍以本地命令编排为主；是否形成新的模型消息，要看命令产物。",
+        mapping: "这是 /buddy 最核心的归属阶段，对应主图的阶段 2。",
+        files: [
+          "restored-src/src/commands.ts",
+          "restored-src/src/utils/handlePromptSubmit.ts",
+          "restored-src/src/utils/processUserInput/processSlashCommand.tsx"
+        ]
+      },
+      {
+        id: "state",
+        title: "3. 孵化结果写入状态：soul 持久化，bones 重算",
+        tag: "状态",
+        kind: "active",
+        short: "/buddy 点亮后，不只是打印结果，而是把 companion 变成长期状态。",
+        body: "从 buddy 模块周边结构可以确认，系统会在 global config 中保存 companion 与 companionMuted。真正持久化的是 soul：name、personality、hatchedAt；外观 bones 如 rarity、species、eye、hat、stats 按 userId 决定性重算。",
+        bullets: [
+          "config.ts 里定义了 companion 与 companionMuted 字段。",
+          "companion.ts 通过 userId + salt 决定性 roll 出 bones。",
+          "getCompanion() 会把 stored soul 和 reroll bones 合并。"
+        ],
+        tokenPhase: "这是本地状态层变化，不依赖模型流式输出。",
+        mapping: "严格说不在主图单一阶段里，它是 slash command 执行后的本地副作用。",
+        files: [
+          "restored-src/src/utils/config.ts",
+          "restored-src/src/buddy/companion.ts",
+          "restored-src/src/buddy/types.ts"
+        ]
+      },
+      {
+        id: "context",
+        title: "4. companion 进入模型上下文",
+        tag: "上下文",
+        kind: "active",
+        short: "点亮后的 buddy 会反过来改变后续消息构造。",
+        body: "一旦 companion 存在且未被 mute，系统会通过 attachment 机制追加 companion_intro。messages.ts 会把它转成 system reminder，明确告诉模型：屏幕旁边有一个名叫某某的 companion；当用户在和它说话时，主 assistant 要尽量退场。",
+        bullets: [
+          "getCompanionIntroAttachment 负责生成 attachment。",
+          "messages.ts 里把 companion_intro 转成系统提醒文本。",
+          "这意味着 buddy 不只是 UI 装饰，它会影响模型行为边界。"
+        ],
+        tokenPhase: "这里开始影响真实 prompt 组成，因为 attachment 会进入消息构造。",
+        mapping: "对齐 user-token-to-output-flow 的阶段 4：query 准备 API 消息。",
+        files: [
+          "restored-src/src/buddy/prompt.ts",
+          "restored-src/src/utils/attachments.ts",
+          "restored-src/src/utils/messages.ts"
+        ]
+      },
+      {
+        id: "observer",
+        title: "5. turn 结束后，观察者为 companion 生成 reaction",
+        tag: "回流",
+        kind: "decision",
+        short: "buddy 不是只在 /buddy 当下发生，后续每轮 turn 结束还会驱动 bubble。",
+        body: "在 REPL query 结束后，代码会调用 fireCompanionObserver(messagesRef.current, ...) 把 reaction 写进 app state。虽然 observer 文件当前没被完整还原，但 companionReaction 字段与 bubble 渲染逻辑都说明：companion 会基于最近消息生成一小段旁白式 reaction。",
+        bullets: [
+          "REPL.tsx 在 query 完成后触发 observer。",
+          "AppStateStore 持有 companionReaction。",
+          "CompanionSprite 和 FloatingBubble 消费这个 reaction 并在超时后自动清除。"
+        ],
+        tokenPhase: "通常发生在 turn 结束后，是 UI 消费结果的后处理层。",
+        mapping: "这更接近阶段 8 之前的收尾后处理，不是 query 核心采样的一部分。",
+        files: [
+          "restored-src/src/screens/REPL.tsx",
+          "restored-src/src/state/AppStateStore.ts",
+          "restored-src/src/buddy/CompanionSprite.tsx"
+        ]
+      },
+      {
+        id: "render",
+        title: "6. REPL 渲染：sprite、bubble、hearts",
+        tag: "渲染",
+        kind: "end",
+        short: "最终用户感知到的是 terminal 右下角那个会说话的 companion。",
+        body: "CompanionSprite 负责常驻形象、窄屏折叠、气泡联动与 pet hearts。fullscreen 下还会分离出 CompanionFloatingBubble。PromptInput 还会预留列宽，避免 companion 与输入区互相挤压。",
+        bullets: [
+          "companionReservedColumns 影响输入区宽度。",
+          "companionPetAt 会驱动短时 hearts 动画。",
+          "companionReaction 会驱动 speech bubble，并在约 10 秒后消失。"
+        ],
+        tokenPhase: "这里已经是输出落地层，属于用户可见 UI，而不是模型 token 继续生成阶段。",
+        mapping: "明确对应主图阶段 8：session/REPL 渲染与最终可见结果。",
+        files: [
+          "restored-src/src/buddy/CompanionSprite.tsx",
+          "restored-src/src/screens/REPL.tsx",
+          "restored-src/src/components/PromptInput/PromptInput.tsx"
+        ]
+      },
+      {
+        id: "summary",
+        title: "7. 最终定位：/buddy 是一条命令，也是一个子系统开关",
+        tag: "结论",
+        kind: "end",
+        short: "如果只问它属于哪个阶段，答案是阶段 2；如果问它做了什么，答案远不止阶段 2。",
+        body: "最简结论是：/buddy 命令入口属于 slash command 分流阶段。但这个回答太窄。完整答案应该是：/buddy 是 companion 系统的显式入口，命令触发本地状态写入，之后它会持续影响消息附件、模型上下文、turn 后 reaction 生成以及 REPL 渲染。",
+        bullets: [
+          "问“命令入口在哪”：答阶段 2。",
+          "问“为什么它看起来像长期功能”：因为它会持续驻留在 config、app state 与 REPL。",
+          "问“它会不会影响模型”：会，通过 companion_intro attachment。"
+        ],
+        tokenPhase: "单次命令只是一瞬；companion 带来的上下文影响和 UI 驻留才是长期效应。",
+        mapping: "这是对整个主图的跨阶段总结。",
+        files: [
+          "docs/user-token-to-output-flow.html",
+          "restored-src/src/commands.ts",
+          "restored-src/src/buddy/prompt.ts"
+        ]
+      }
+    ];
+
+    let currentStep = 0;
+    let totalSteps = steps.length;
+    let isPlaying = false;
+    let playTimer = null;
+    let playSpeed = 1300;
+
+    function renderStepList() {
+      const stepList = document.getElementById("stepList");
+      stepList.innerHTML = steps.map((step, index) => `
+        <div class="step-item ${index === currentStep ? "active" : ""}" onclick="goToStep(${index})">
+          <strong>${step.title}</strong>
+          <small>${step.short}</small>
+        </div>
+      `).join("");
+    }
+
+    function renderFlow() {
+      const flowContainer = document.getElementById("flowContainer");
+      flowContainer.innerHTML = steps.map((step, index) => `
+        <div class="flow-node ${step.kind} ${index <= currentStep ? "reached" : ""} ${index === currentStep ? "active" : ""}">
+          <div class="node-top">
+            <div>
+              <h3>${step.title}</h3>
+              <p class="muted">${step.short}</p>
+            </div>
+            <span class="node-tag">${step.tag}</span>
+          </div>
+          <div class="node-grid">
+            <div class="mini"><strong>系统动作</strong><br>${step.body}</div>
+            <div class="mini"><strong>token 视角</strong><br>${step.tokenPhase}</div>
+          </div>
+        </div>
+        ${index < steps.length - 1 ? '<div class="arrow">↓</div>' : ""}
+      `).join("");
+    }
+
+    function renderDetails() {
+      const step = steps[currentStep];
+      document.getElementById("detailTitle").textContent = step.title;
+      document.getElementById("detailContainer").innerHTML = `
+        <div class="detail-block active">
+          <p>${step.body}</p>
+          <ul>${step.bullets.map(item => `<li>${item}</li>`).join("")}</ul>
+        </div>
+      `;
+      document.getElementById("mappingBox").innerHTML = `
+        <p><strong>阶段映射：</strong>${step.mapping}</p>
+        <p><strong>token 角度：</strong>${step.tokenPhase}</p>
+      `;
+    }
+
+    function renderCodeList() {
+      const step = steps[currentStep];
+      const codeList = document.getElementById("codeList");
+      codeList.innerHTML = step.files.map(file => `<div class="code-item">${file}</div>`).join("");
+    }
+
+    function updateStepIndicator() {
+      const indicator = document.getElementById("stepIndicator");
+      indicator.textContent = `步骤 ${currentStep + 1} / ${totalSteps}`;
+      const progress = document.getElementById("progressBar");
+      progress.max = totalSteps - 1;
+      progress.value = currentStep;
+    }
+
+    function updateButtons() {
+      document.getElementById("prevBtn").disabled = currentStep === 0;
+      document.getElementById("nextBtn").disabled = currentStep === totalSteps - 1;
+    }
+
+    function updatePlayButton() {
+      const btn = document.getElementById("playBtn");
+      btn.textContent = isPlaying ? "暂停" : "播放";
+    }
+
+    function render() {
+      renderStepList();
+      renderFlow();
+      renderDetails();
+      renderCodeList();
+      updateStepIndicator();
+      updateButtons();
+      updatePlayButton();
+    }
+
+    function nextStep() {
+      if (currentStep < totalSteps - 1) {
+        currentStep++;
+        render();
+      }
+    }
+
+    function prevStep() {
+      if (currentStep > 0) {
+        currentStep--;
+        render();
+      }
+    }
+
+    function goToStep(n) {
+      currentStep = Math.max(0, Math.min(n, totalSteps - 1));
+      render();
+    }
+
+    function togglePlay() {
+      isPlaying = !isPlaying;
+      if (isPlaying) {
+        playTimer = setInterval(() => {
+          if (currentStep < totalSteps - 1) {
+            nextStep();
+          } else {
+            togglePlay();
+          }
+        }, playSpeed);
+      } else {
+        clearInterval(playTimer);
+      }
+      updatePlayButton();
+    }
+
+    function setSpeed(speed) {
+      playSpeed = parseInt(speed, 10);
+      if (isPlaying) {
+        clearInterval(playTimer);
+        playTimer = setInterval(() => {
+          if (currentStep < totalSteps - 1) {
+            nextStep();
+          } else {
+            togglePlay();
+          }
+        }, playSpeed);
+      }
+    }
+
+    document.addEventListener("keydown", (e) => {
+      switch (e.key) {
+        case "ArrowLeft":
+          prevStep();
+          break;
+        case "ArrowRight":
+          nextStep();
+          break;
+        case " ":
+          e.preventDefault();
+          togglePlay();
+          break;
+        case "Home":
+          goToStep(0);
+          break;
+        case "End":
+          goToStep(totalSteps - 1);
+          break;
+      }
+    });
+
+    render();
+  </script>
+</body>
+</html>

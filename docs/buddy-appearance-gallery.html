@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buddy 外观图鉴 - Claude Code Sourcemap</title>
+  <style>
+    :root {
+      --primary: #2196f3;
+      --secondary: #ff9800;
+      --success: #4caf50;
+      --danger: #f44336;
+      --warning: #ffc107;
+      --gray-100: #f5f5f5;
+      --gray-200: #eceff1;
+      --gray-300: #d8e0e7;
+      --gray-500: #78909c;
+      --gray-700: #455a64;
+      --gray-900: #1f2a30;
+      --component: #42a5f5;
+      --service: #66bb6a;
+      --database: #ffa726;
+      --message-queue: #ab47bc;
+      --api-gateway: #26c6da;
+      --external: #78909c;
+      --gradient-blue: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --gradient-green: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      --gradient-orange: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      --radius: 18px;
+      --shadow: 0 16px 36px rgba(31, 42, 48, 0.12);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(33, 150, 243, 0.08), transparent 28%),
+        radial-gradient(circle at top right, rgba(255, 152, 0, 0.12), transparent 30%),
+        linear-gradient(180deg, #f8fbff 0%, #eef3f7 100%);
+      min-height: 100vh;
+      color: var(--gray-900);
+    }
+
+    .dashboard {
+      max-width: 1460px;
+      margin: 0 auto;
+      padding: 22px;
+    }
+
+    .hero, .card {
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(216, 224, 231, 0.9);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .hero {
+      padding: 28px;
+      margin-bottom: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -48px;
+      top: -48px;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(102, 126, 234, 0.22), transparent 68%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(33, 150, 243, 0.1);
+      color: var(--gray-700);
+      font-size: 13px;
+    }
+
+    .title {
+      margin: 16px 0 12px;
+      font-size: clamp(32px, 5vw, 54px);
+      line-height: 1.05;
+      background: var(--gradient-blue);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      max-width: 980px;
+      font-size: 16px;
+      line-height: 1.8;
+      color: var(--gray-700);
+    }
+
+    .hero-grid {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .summary-item {
+      padding: 14px;
+      min-height: 104px;
+      border-radius: 16px;
+      background: rgba(33, 150, 243, 0.07);
+      border: 1px solid rgba(33, 150, 243, 0.1);
+    }
+
+    .summary-item:nth-child(2n) {
+      background: rgba(255, 152, 0, 0.08);
+      border-color: rgba(255, 152, 0, 0.12);
+    }
+
+    .summary-item h3 {
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .summary-item p {
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .dashboard-body {
+      display: grid;
+      grid-template-columns: 300px 1fr 330px;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .main-area {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .card { padding: 18px; }
+
+    .card h2 {
+      font-size: 20px;
+      margin-bottom: 12px;
+    }
+
+    .card h3 {
+      font-size: 15px;
+      margin-bottom: 10px;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 15px 0 4px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 999px;
+      background: var(--primary);
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+
+    .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+    .btn.secondary { background: #90a4ae; }
+
+    .filter-group {
+      margin-bottom: 14px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .filter-group label {
+      font-size: 13px;
+      color: var(--gray-700);
+      font-weight: 600;
+    }
+
+    select, input[type="text"], input[type="range"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--gray-300);
+      border-radius: 12px;
+      background: white;
+      color: var(--gray-900);
+      font-size: 14px;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border: 1px solid var(--gray-300);
+      border-radius: 12px;
+      background: white;
+      font-size: 14px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .stat {
+      padding: 12px;
+      border-radius: 14px;
+      background: linear-gradient(180deg, rgba(17, 153, 142, 0.08), rgba(255, 255, 255, 0.95));
+      border: 1px solid rgba(17, 153, 142, 0.12);
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 22px;
+      margin-bottom: 6px;
+    }
+
+    .stat span {
+      color: var(--gray-700);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .subgrid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .probability-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .prob-row {
+      display: grid;
+      grid-template-columns: 92px 1fr 64px;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--gray-700);
+    }
+
+    .prob-bar {
+      height: 12px;
+      border-radius: 999px;
+      background: var(--gray-200);
+      overflow: hidden;
+    }
+
+    .prob-bar span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--gradient-blue);
+    }
+
+    .simulator {
+      display: grid;
+      gap: 12px;
+    }
+
+    .sim-result {
+      border-radius: 16px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(240,247,255,0.98));
+      border: 1px solid rgba(33, 150, 243, 0.12);
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .sim-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .buddy-card {
+      border-radius: 18px;
+      background: white;
+      border: 1px solid var(--gray-300);
+      overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .buddy-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 30px rgba(31, 42, 48, 0.12);
+      border-color: rgba(33, 150, 243, 0.24);
+    }
+
+    .buddy-head {
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      color: white;
+    }
+
+    .rarity-common { background: linear-gradient(135deg, #90a4ae, #607d8b); }
+    .rarity-uncommon { background: linear-gradient(135deg, #43a047, #66bb6a); }
+    .rarity-rare { background: linear-gradient(135deg, #1976d2, #42a5f5); }
+    .rarity-epic { background: linear-gradient(135deg, #ef6c00, #ffa726); }
+    .rarity-legendary { background: linear-gradient(135deg, #8e24aa, #ec407a); }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.18);
+      font-size: 12px;
+    }
+
+    .buddy-body {
+      padding: 16px 14px 14px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .sprite-box {
+      min-height: 148px;
+      border-radius: 14px;
+      background: linear-gradient(180deg, #0f1720 0%, #1f2937 100%);
+      color: #d7f2ff;
+      padding: 14px;
+      font-family: Consolas, Monaco, monospace;
+      font-size: 13px;
+      line-height: 1.08;
+      white-space: pre;
+      overflow: auto;
+      border: 1px solid rgba(15, 23, 32, 0.7);
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .meta {
+      border-radius: 12px;
+      background: var(--gray-100);
+      padding: 10px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--gray-700);
+    }
+
+    .meta strong { color: var(--gray-900); }
+
+    .species-nav {
+      display: grid;
+      gap: 8px;
+      max-height: 380px;
+      overflow: auto;
+    }
+
+    .species-item {
+      padding: 10px 12px;
+      border: 1px solid var(--gray-300);
+      border-radius: 12px;
+      background: white;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 14px;
+    }
+
+    .species-item.active {
+      background: rgba(33, 150, 243, 0.08);
+      border-color: rgba(33, 150, 243, 0.3);
+      transform: translateX(4px);
+    }
+
+    .code-item {
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #0f1720;
+      color: #e3f2fd;
+      font-family: Consolas, Monaco, monospace;
+      font-size: 12px;
+      margin-top: 10px;
+      overflow-wrap: anywhere;
+    }
+
+    .detail p, .detail li {
+      font-size: 14px;
+      line-height: 1.75;
+      color: var(--gray-700);
+    }
+
+    .detail ul {
+      padding-left: 18px;
+      margin-top: 10px;
+    }
+
+    .hint {
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 12px;
+      background: rgba(255, 193, 7, 0.12);
+      color: #6a4b00;
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    @media (max-width: 1220px) {
+      .dashboard-body {
+        grid-template-columns: 1fr;
+      }
+      .gallery {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .hero-grid, .stats, .subgrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 760px) {
+      .dashboard { padding: 14px; }
+      .hero-grid, .stats, .gallery, .subgrid, .sim-grid {
+        grid-template-columns: 1fr;
+      }
+      .controls {
+        justify-content: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 主题：Buddy 外观图鉴；操作：筛选、左右键切换物种、空格自动轮播 -->
+  <div class="dashboard">
+    <section class="hero">
+      <div class="eyebrow">Buddy appearance gallery · single-file interactive HTML</div>
+      <h1 class="title">Buddy 外观图鉴</h1>
+      <p>
+        这页用于介绍当前项目里 buddy 的外观空间：18 种 species、5 档 rarity、8 种帽子、6 种眼睛、1% 的 shiny。
+        每个用户实际只会拥有 1 个 buddy，但系统理论上能覆盖大量外观组合。页面支持筛选、轮播、物种聚焦，
+        并解释为什么基础离散外观至少有 7128 种。
+      </p>
+      <div class="hero-grid">
+        <div class="summary-item">
+          <h3>每个用户</h3>
+          <p>配置里只有单个 <code>companion</code> 字段，所以同一时刻只会有 1 个 buddy。</p>
+        </div>
+        <div class="summary-item">
+          <h3>基础外观数</h3>
+          <p><code>common</code> 固定无帽，其余 rarity 可选 8 帽，合计离散外观至少 7128 种。</p>
+        </div>
+        <div class="summary-item">
+          <h3>不是全部</h3>
+          <p>还没把 5 个 stats、名字、性格、hatchedAt 算进去，所以真实理论空间更大。</p>
+        </div>
+        <div class="summary-item">
+          <h3>展示说明</h3>
+          <p>眼睛 glyph 在还原源码里存在编码噪声，本页使用规范化预览符号，不影响数量与角色解释。</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="dashboard-body">
+      <aside class="card">
+        <h2>筛选器</h2>
+
+        <div class="filter-group">
+          <label for="speciesFilter">物种</label>
+          <select id="speciesFilter" onchange="applyFilters()"></select>
+        </div>
+
+        <div class="filter-group">
+          <label for="rarityFilter">稀有度</label>
+          <select id="rarityFilter" onchange="applyFilters()"></select>
+        </div>
+
+        <div class="filter-group">
+          <label for="hatFilter">帽子</label>
+          <select id="hatFilter" onchange="applyFilters()"></select>
+        </div>
+
+        <div class="filter-group">
+          <label for="eyeFilter">眼睛预览</label>
+          <select id="eyeFilter" onchange="applyFilters()"></select>
+        </div>
+
+        <div class="filter-group">
+          <label for="searchInput">搜索物种</label>
+          <input id="searchInput" type="text" placeholder="例如 duck / dragon" oninput="applyFilters()">
+        </div>
+
+        <div class="filter-group">
+          <label for="frameSlider">动画帧</label>
+          <input id="frameSlider" type="range" min="0" max="2" value="0" oninput="setFrame(this.value)">
+        </div>
+
+        <div class="toggle-row">
+          <span>只看 shiny 预览</span>
+          <input id="shinyOnly" type="checkbox" onchange="applyFilters()">
+        </div>
+
+        <div class="controls">
+          <button class="btn" id="prevBtn" onclick="prevSpecies()">上一种</button>
+          <button class="btn" id="playBtn" onclick="togglePlay()">播放</button>
+          <button class="btn" id="nextBtn" onclick="nextSpecies()">下一种</button>
+          <button class="btn secondary" onclick="resetFilters()">重置</button>
+        </div>
+
+        <div class="hint">
+          键盘支持：<code>←</code> / <code>→</code> 切换当前聚焦物种，<code>空格</code> 自动轮播。
+        </div>
+      </aside>
+
+      <main class="main-area">
+        <section class="card">
+          <h2>核心统计</h2>
+          <div class="stats">
+            <div class="stat">
+              <strong id="speciesCount">18</strong>
+              <span>species 数量</span>
+            </div>
+            <div class="stat">
+              <strong>5</strong>
+              <span>rarity 数量</span>
+            </div>
+            <div class="stat">
+              <strong>8</strong>
+              <span>帽子数量</span>
+            </div>
+            <div class="stat">
+              <strong>7128</strong>
+              <span>基础离散外观组合</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>图鉴卡片</h2>
+          <div id="gallery" class="gallery"></div>
+        </section>
+
+        <section class="subgrid">
+          <div class="card">
+            <h2>随机孵化模拟器</h2>
+            <div class="simulator">
+              <div class="controls" style="padding-top: 0;">
+                <button class="btn" onclick="hatchRandomBuddy()">孵化 1 只</button>
+                <button class="btn secondary" onclick="hatchBatch(10)">连抽 10 次</button>
+                <button class="btn secondary" onclick="hatchBatch(100)">连抽 100 次</button>
+              </div>
+              <div id="simulatorResult" class="sim-result"></div>
+              <div class="hint">
+                这里模拟的是项目里的 buddy 生成规则，不是“一个用户可以拥有多只”。真实配置结构仍然只有单个 <code>companion</code>。
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>稀有度概率展示</h2>
+            <div id="probabilityList" class="probability-list"></div>
+            <div class="hint">
+              权重来自 <code>RARITY_WEIGHTS</code>：common 60、uncommon 25、rare 10、epic 4、legendary 1，总和 100。
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <aside class="card detail">
+        <h2>当前聚焦物种</h2>
+        <div id="focusPanel"></div>
+
+        <h2 style="margin-top: 18px;">源码锚点</h2>
+        <div class="code-item">restored-src/src/buddy/types.ts</div>
+        <div class="code-item">restored-src/src/buddy/companion.ts</div>
+        <div class="code-item">restored-src/src/buddy/sprites.ts</div>
+
+        <h2 style="margin-top: 18px;">组合数怎么算</h2>
+        <ul>
+          <li><strong>common</strong>：帽子固定 <code>none</code>，所以是 18 × 6 × 2 = 216。</li>
+          <li><strong>其他 4 档 rarity</strong>：18 × 6 × 8 × 2 × 4 = 6912。</li>
+          <li><strong>合计</strong>：216 + 6912 = 7128。</li>
+          <li>这里只算 species / eye / hat / shiny / rarity，没有把 stats、名字、personality 算进去。</li>
+        </ul>
+
+        <div class="hint">
+          这页介绍的是“外观空间”。如果你问“一个用户能孵化多少个”，答案仍然是 1 个，因为配置结构不是数组。
+        </div>
+
+        <h2 style="margin-top: 18px;">物种导航</h2>
+        <div id="speciesNav" class="species-nav"></div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const SPECIES = [
+      "duck","goose","blob","cat","dragon","octopus","owl","penguin","turtle",
+      "snail","ghost","axolotl","capybara","cactus","robot","rabbit","mushroom","chonk"
+    ];
+    const RARITIES = ["common","uncommon","rare","epic","legendary"];
+    const RARITY_WEIGHTS = { common: 60, uncommon: 25, rare: 10, epic: 4, legendary: 1 };
+    const HATS = ["none","crown","tophat","propeller","halo","wizard","beanie","tinyduck"];
+    const EYES = [
+      { key: "o", label: "o" },
+      { key: "*", label: "*" },
+      { key: "^", label: "^" },
+      { key: "-", label: "-" },
+      { key: "@", label: "@" },
+      { key: "°", label: "°" }
+    ];
+    const RARITY_LABELS = {
+      common: "Common",
+      uncommon: "Uncommon",
+      rare: "Rare",
+      epic: "Epic",
+      legendary: "Legendary"
+    };
+    const SPRITES = {
+      duck: [
+        ["    __      ","  <({E} )___  ","   (  ._>   ","    `--\\    "],
+        ["    __      ","  <({E} )___  ","   (  ._>   ","    `--\\~   "],
+        ["    __      ","  <({E} )___  ","   (  .__>  ","    `--\\    "]
+      ],
+      goose: [
+        ["     ({E}>    ","     ||     ","   _(__)_   ","    ^^^^    "],
+        ["    ({E}>     ","     ||     ","   _(__)_   ","    ^^^^    "],
+        ["     ({E}>>   ","     ||     ","   _(__)_   ","    ^^^^    "]
+      ],
+      blob: [
+        ["   .----.   ","  ( {E}  {E} )  ","  (      )  ","   `----\\   "],
+        ["  .------.  "," (  {E}  {E}  ) "," (        ) ","  `------\\  "],
+        ["    .--.    ","   ({E}  {E})   ","   (    )   ","    `--\\    "]
+      ],
+      cat: [
+        ["   /\\_/\\\\    ","  ( {E}   {E})  ","  (  w  )   ","  (\")_(\")   "],
+        ["   /\\_/\\\\    ","  ( {E}   {E})  ","  (  w  )   ","  (\")_(\")~  "],
+        ["   /\\-/\\\\    ","  ( {E}   {E})  ","  (  w  )   ","  (\")_(\")   "]
+      ],
+      dragon: [
+        ["  /^\\\\  /^\\\\  "," <  {E}  {E}  > "," (   ~~   ) ","  `-vvvv-\\  "],
+        ["  /^\\\\  /^\\\\  "," <  {E}  {E}  > "," (        ) ","  `-vvvv-\\  "],
+        ["   ~    ~   ","  /^\\\\  /^\\\\  "," <  {E}  {E}  > "," (   ~~   ) "]
+      ],
+      octopus: [
+        ["   .----.   ","  ( {E}  {E} )  ","  (______)  ","  /\\\\/\\\\/\\\\/\\\\  "],
+        ["   .----.   ","  ( {E}  {E} )  ","  (______)  ","  \\\\/\\\\/\\\\/\\\\/  "],
+        ["     o      ","   .----.   ","  ( {E}  {E} )  ","  (______)  "]
+      ],
+      owl: [
+        ["   /\\\\  /\\\\   ","  (({E})({E}))  ","  (  ><  )  ","   `----\\   "],
+        ["   /\\\\  /\\\\   ","  (({E})({E}))  ","  (  ><  )  ","   .----.   "],
+        ["   /\\\\  /\\\\   ","  (({E})(-))  ","  (  ><  )  ","   `----\\   "]
+      ],
+      penguin: [
+        ["  .---.     ","  ({E}>{E})     "," /(   )\\\\    ","  `---\\     "],
+        ["  .---.     ","  ({E}>{E})     "," |(   )|    ","  `---\\     "],
+        ["  .---.     ","  ({E}>{E})     "," /(   )\\\\    ","   ~ ~      "]
+      ],
+      turtle: [
+        ["   _,--._   ","  ( {E}  {E} )  "," /[______]\\\\ ","  ``    ``  "],
+        ["   _,--._   ","  ( {E}  {E} )  "," /[______]\\\\ ","   ``  ``   "],
+        ["   _,--._   ","  ( {E}  {E} )  "," /[======]\\\\ ","  ``    ``  "]
+      ],
+      snail: [
+        [" {E}    .--.  ","  \\\\  ( @ )  ","   \\\\_`--\\   ","  ~~~~~~~   "],
+        ["  {E}   .--.  ","  |  ( @ )  ","   \\\\_`--\\   ","  ~~~~~~~   "],
+        [" {E}    .--.  ","  \\\\  ( @  ) ","   \\\\_`--\\   ","   ~~~~~~   "]
+      ],
+      ghost: [
+        ["   .----.   ","  / {E}  {E} \\\\  ","  |      |  ","  ~`~``~`~  "],
+        ["   .----.   ","  / {E}  {E} \\\\  ","  |      |  ","  `~`~~`~`  "],
+        ["    ~  ~    ","   .----.   ","  / {E}  {E} \\\\  ","  |      |  "]
+      ],
+      axolotl: [
+        ["}~(______)~{","}~({E} .. {E})~{","  ( .--. )  ","  (_/  \\\\_)  "],
+        ["~}(______){~","~}({E} .. {E}){~","  ( .--. )  ","  (_/  \\\\_)  "],
+        ["}~(______)~{","}~({E} .. {E})~{","  (  --  )  ","  ~_/  \\\\_~  "]
+      ],
+      capybara: [
+        ["  n______n  "," ( {E}    {E} ) "," (   oo   ) ","  `------\\  "],
+        ["  n______n  "," ( {E}    {E} ) "," (   Oo   ) ","  `------\\  "],
+        ["    ~  ~    ","  u______n  "," ( {E}    {E} ) "," (   oo   ) "]
+      ],
+      cactus: [
+        [" n  ____  n "," | |{E}  {E}| | "," |_|    |_| ","   |    |   "],
+        ["    ____    "," n |{E}  {E}| n "," |_|    |_| ","   |    |   "],
+        [" n        n "," |  ____  | "," | |{E}  {E}| | "," |_|    |_| "]
+      ],
+      robot: [
+        ["   .[||].   ","  [ {E}  {E} ]  ","  [ ==== ]  ","  `------\\  "],
+        ["   .[||].   ","  [ {E}  {E} ]  ","  [ -==- ]  ","  `------\\  "],
+        ["     *      ","   .[||].   ","  [ {E}  {E} ]  ","  [ ==== ]  "]
+      ],
+      rabbit: [
+        ["   (\\\\__/)   ","  ( {E}  {E} )  "," =(  ..  )= ","  (\")__(\")  "],
+        ["   (|__/)   ","  ( {E}  {E} )  "," =(  ..  )= ","  (\")__(\")  "],
+        ["   (\\\\__/)   ","  ( {E}  {E} )  "," =( .  . )= ","  (\")__(\")  "]
+      ],
+      mushroom: [
+        [" .-o-OO-o-. ","(__________)","   |{E}  {E}|   ","   |____|   "],
+        [" .-O-oo-O-. ","(__________)","   |{E}  {E}|   ","   |____|   "],
+        ["   . o  .   "," .-o-OO-o-. ","(__________)","   |{E}  {E}|   "]
+      ],
+      chonk: [
+        ["  /\\\\    /\\\\  "," ( {E}    {E} ) "," (   ..   ) ","  `------\\  "],
+        ["  /\\\\    /|  "," ( {E}    {E} ) "," (   ..   ) ","  `------\\  "],
+        ["  /\\\\    /\\\\  "," ( {E}    {E} ) "," (   ..   ) ","  `------\\~ "]
+      ]
+    };
+    const HAT_LINES = {
+      none: "",
+      crown: "   \\^^^/    ",
+      tophat: "   [___]    ",
+      propeller: "    -+-     ",
+      halo: "   (   )    ",
+      wizard: "    /^\\\\     ",
+      beanie: "   (___)    ",
+      tinyduck: "    ,>      "
+    };
+
+    let focusedSpeciesIndex = 0;
+    let currentFrame = 0;
+    let isPlaying = false;
+    let playTimer = null;
+    let lastHatchedBuddy = null;
+    let hatchHistory = [];
+
+    function shouldAllowHat(rarity, hat) {
+      if (rarity === "common") return hat === "none";
+      return true;
+    }
+
+    function normalizeBuddy(species, rarity, hat, eye, shiny) {
+      const safeHat = shouldAllowHat(rarity, hat) ? hat : "none";
+      return { species, rarity, hat: safeHat, eye, shiny };
+    }
+
+    function renderSprite(buddy, frame) {
+      const frames = SPRITES[buddy.species];
+      const raw = frames[frame % frames.length];
+      const lines = raw.map(line => line.replaceAll("{E}", buddy.eye));
+      if (buddy.hat !== "none" && lines[0].trim() === "") {
+        lines[0] = HAT_LINES[buddy.hat];
+      } else if (buddy.hat !== "none" && !raw[0].trim()) {
+        lines.unshift(HAT_LINES[buddy.hat]);
+      }
+      const output = lines.filter((line, idx) => !(idx === 0 && line.trim() === ""));
+      return output.map(line => buddy.shiny ? line.replaceAll(".", "✦") : line).join("\n");
+    }
+
+    function baseCombinationCount() {
+      const common = 18 * 6 * 2;
+      const nonCommon = 4 * 18 * 6 * 8 * 2;
+      return common + nonCommon;
+    }
+
+    function rarityChance(rarity) {
+      const total = Object.values(RARITY_WEIGHTS).reduce((sum, n) => sum + n, 0);
+      return (RARITY_WEIGHTS[rarity] / total) * 100;
+    }
+
+    function randomPick(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function rollRarity() {
+      let roll = Math.random() * Object.values(RARITY_WEIGHTS).reduce((sum, n) => sum + n, 0);
+      for (const rarity of RARITIES) {
+        roll -= RARITY_WEIGHTS[rarity];
+        if (roll < 0) return rarity;
+      }
+      return "common";
+    }
+
+    function createRandomBuddy() {
+      const rarity = rollRarity();
+      const species = randomPick(SPECIES);
+      const eye = randomPick(EYES).key;
+      const hat = rarity === "common" ? "none" : randomPick(HATS);
+      const shiny = Math.random() < 0.01;
+      return normalizeBuddy(species, rarity, hat, eye, shiny);
+    }
+
+    function renderProbability() {
+      const container = document.getElementById("probabilityList");
+      container.innerHTML = RARITIES.map(rarity => `
+        <div class="prob-row">
+          <strong>${rarity}</strong>
+          <div class="prob-bar"><span style="width: ${rarityChance(rarity)}%"></span></div>
+          <span>${rarityChance(rarity).toFixed(0)}%</span>
+        </div>
+      `).join("");
+    }
+
+    function renderSimulator() {
+      const container = document.getElementById("simulatorResult");
+      if (!lastHatchedBuddy) {
+        container.innerHTML = `
+          <div class="meta"><strong>尚未孵化</strong><br>点击上方按钮生成一只模拟 buddy。</div>
+        `;
+        return;
+      }
+      const rarityStats = RARITIES.map(rarity => {
+        const count = hatchHistory.filter(item => item.rarity === rarity).length;
+        return `<div class="meta"><strong>${rarity}</strong><br>${count} / ${hatchHistory.length}</div>`;
+      }).join("");
+      container.innerHTML = `
+        <div class="buddy-card">
+          <div class="buddy-head rarity-${lastHatchedBuddy.rarity}">
+            <div>
+              <strong>${lastHatchedBuddy.species}</strong>
+              <div style="font-size:12px;opacity:0.92;">最新孵化结果</div>
+            </div>
+            <span class="chip">${lastHatchedBuddy.shiny ? "Shiny" : "Standard"}</span>
+          </div>
+          <div class="buddy-body">
+            <div class="sprite-box">${renderSprite(lastHatchedBuddy, currentFrame)}</div>
+            <div class="sim-grid">
+              <div class="meta"><strong>rarity</strong><br>${lastHatchedBuddy.rarity}</div>
+              <div class="meta"><strong>hat</strong><br>${lastHatchedBuddy.hat}</div>
+              <div class="meta"><strong>eye</strong><br>${lastHatchedBuddy.eye}</div>
+              <div class="meta"><strong>历史样本</strong><br>${hatchHistory.length}</div>
+            </div>
+          </div>
+        </div>
+        <div class="sim-grid">${rarityStats}</div>
+      `;
+    }
+
+    function hatchRandomBuddy() {
+      lastHatchedBuddy = createRandomBuddy();
+      hatchHistory.push(lastHatchedBuddy);
+      renderSimulator();
+    }
+
+    function hatchBatch(count) {
+      for (let i = 0; i < count; i++) {
+        lastHatchedBuddy = createRandomBuddy();
+        hatchHistory.push(lastHatchedBuddy);
+      }
+      renderSimulator();
+    }
+
+    function currentFocusSpecies() {
+      return SPECIES[focusedSpeciesIndex] || SPECIES[0];
+    }
+
+    function populateFilters() {
+      const speciesFilter = document.getElementById("speciesFilter");
+      speciesFilter.innerHTML = [`<option value="all">全部 species</option>`]
+        .concat(SPECIES.map(species => `<option value="${species}">${species}</option>`))
+        .join("");
+
+      const rarityFilter = document.getElementById("rarityFilter");
+      rarityFilter.innerHTML = [`<option value="all">全部 rarity</option>`]
+        .concat(RARITIES.map(rarity => `<option value="${rarity}">${RARITY_LABELS[rarity]}</option>`))
+        .join("");
+
+      const hatFilter = document.getElementById("hatFilter");
+      hatFilter.innerHTML = [`<option value="all">全部帽子</option>`]
+        .concat(HATS.map(hat => `<option value="${hat}">${hat}</option>`))
+        .join("");
+
+      const eyeFilter = document.getElementById("eyeFilter");
+      eyeFilter.innerHTML = [`<option value="all">全部眼睛</option>`]
+        .concat(EYES.map(eye => `<option value="${eye.key}">${eye.label}</option>`))
+        .join("");
+    }
+
+    function buildCandidates() {
+      const speciesValue = document.getElementById("speciesFilter").value;
+      const rarityValue = document.getElementById("rarityFilter").value;
+      const hatValue = document.getElementById("hatFilter").value;
+      const eyeValue = document.getElementById("eyeFilter").value;
+      const shinyOnly = document.getElementById("shinyOnly").checked;
+      const search = document.getElementById("searchInput").value.trim().toLowerCase();
+
+      return SPECIES
+        .filter(species => speciesValue === "all" || species === speciesValue)
+        .filter(species => search === "" || species.includes(search))
+        .map(species => {
+          const rarity = rarityValue === "all" ? "rare" : rarityValue;
+          const hat = hatValue === "all" ? (rarity === "common" ? "none" : "wizard") : hatValue;
+          const eye = eyeValue === "all" ? "o" : eyeValue;
+          const shiny = shinyOnly;
+          return normalizeBuddy(species, rarity, hat, eye, shiny);
+        });
+    }
+
+    function renderGallery(candidates) {
+      const gallery = document.getElementById("gallery");
+      if (candidates.length === 0) {
+        gallery.innerHTML = `<div class="buddy-card"><div class="buddy-body"><p>没有匹配结果。</p></div></div>`;
+        return;
+      }
+      gallery.innerHTML = candidates.map((buddy, index) => `
+        <article class="buddy-card" onclick="focusSpeciesByName('${buddy.species}')">
+          <div class="buddy-head rarity-${buddy.rarity}">
+            <div>
+              <strong>${buddy.species}</strong>
+              <div style="font-size:12px;opacity:0.92;">${RARITY_LABELS[buddy.rarity]}</div>
+            </div>
+            <span class="chip">${buddy.shiny ? "Shiny" : "Standard"}</span>
+          </div>
+          <div class="buddy-body">
+            <div class="sprite-box">${renderSprite(buddy, currentFrame)}</div>
+            <div class="meta-grid">
+              <div class="meta"><strong>眼睛</strong><br>${buddy.eye}</div>
+              <div class="meta"><strong>帽子</strong><br>${buddy.hat}</div>
+              <div class="meta"><strong>当前帧</strong><br>${currentFrame + 1} / 3</div>
+              <div class="meta"><strong>提示</strong><br>${index === 0 ? "点击卡片聚焦" : "可筛选"}</div>
+            </div>
+          </div>
+        </article>
+      `).join("");
+      document.getElementById("speciesCount").textContent = String(candidates.length);
+    }
+
+    function renderFocusPanel() {
+      const species = currentFocusSpecies();
+      const rarityValue = document.getElementById("rarityFilter").value === "all" ? "rare" : document.getElementById("rarityFilter").value;
+      const hatValueRaw = document.getElementById("hatFilter").value === "all" ? "wizard" : document.getElementById("hatFilter").value;
+      const eyeValue = document.getElementById("eyeFilter").value === "all" ? "o" : document.getElementById("eyeFilter").value;
+      const shiny = document.getElementById("shinyOnly").checked;
+      const buddy = normalizeBuddy(species, rarityValue, hatValueRaw, eyeValue, shiny);
+
+      document.getElementById("focusPanel").innerHTML = `
+        <div class="buddy-card">
+          <div class="buddy-head rarity-${buddy.rarity}">
+            <div>
+              <strong>${buddy.species}</strong>
+              <div style="font-size:12px;opacity:0.92;">聚焦预览</div>
+            </div>
+            <span class="chip">${buddy.rarity}</span>
+          </div>
+          <div class="buddy-body">
+            <div class="sprite-box">${renderSprite(buddy, currentFrame)}</div>
+            <div class="meta-grid">
+              <div class="meta"><strong>帽子规则</strong><br>${buddy.rarity === "common" ? "common 固定 none" : "可选 8 帽"}</div>
+              <div class="meta"><strong>外观构成</strong><br>species + eye + hat + shiny + rarity</div>
+              <div class="meta"><strong>同用户数量</strong><br>1 个</div>
+              <div class="meta"><strong>理论空间</strong><br>${baseCombinationCount()}+</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderSpeciesNav() {
+      const current = currentFocusSpecies();
+      document.getElementById("speciesNav").innerHTML = SPECIES.map((species, index) => `
+        <div class="species-item ${species === current ? "active" : ""}" onclick="focusSpeciesByIndex(${index})">${species}</div>
+      `).join("");
+    }
+
+    function applyFilters() {
+      const candidates = buildCandidates();
+      renderGallery(candidates);
+      renderFocusPanel();
+      renderSpeciesNav();
+      renderSimulator();
+      renderProbability();
+      updateButtons();
+      updatePlayButton();
+    }
+
+    function focusSpeciesByIndex(index) {
+      focusedSpeciesIndex = Math.max(0, Math.min(index, SPECIES.length - 1));
+      renderFocusPanel();
+      renderSpeciesNav();
+      updateButtons();
+    }
+
+    function focusSpeciesByName(name) {
+      const index = SPECIES.indexOf(name);
+      if (index >= 0) focusSpeciesByIndex(index);
+    }
+
+    function nextSpecies() {
+      if (focusedSpeciesIndex < SPECIES.length - 1) {
+        focusedSpeciesIndex++;
+      } else {
+        focusedSpeciesIndex = 0;
+      }
+      renderFocusPanel();
+      renderSpeciesNav();
+      updateButtons();
+    }
+
+    function prevSpecies() {
+      if (focusedSpeciesIndex > 0) {
+        focusedSpeciesIndex--;
+      } else {
+        focusedSpeciesIndex = SPECIES.length - 1;
+      }
+      renderFocusPanel();
+      renderSpeciesNav();
+      updateButtons();
+    }
+
+    function togglePlay() {
+      isPlaying = !isPlaying;
+      if (isPlaying) {
+        playTimer = setInterval(nextSpecies, 1100);
+      } else {
+        clearInterval(playTimer);
+      }
+      updatePlayButton();
+    }
+
+    function updatePlayButton() {
+      document.getElementById("playBtn").textContent = isPlaying ? "暂停" : "播放";
+    }
+
+    function setFrame(value) {
+      currentFrame = parseInt(value, 10);
+      applyFilters();
+    }
+
+    function resetFilters() {
+      document.getElementById("speciesFilter").value = "all";
+      document.getElementById("rarityFilter").value = "all";
+      document.getElementById("hatFilter").value = "all";
+      document.getElementById("eyeFilter").value = "all";
+      document.getElementById("searchInput").value = "";
+      document.getElementById("frameSlider").value = "0";
+      document.getElementById("shinyOnly").checked = false;
+      currentFrame = 0;
+      focusedSpeciesIndex = 0;
+      applyFilters();
+    }
+
+    function updateButtons() {
+      document.getElementById("prevBtn").disabled = SPECIES.length === 0;
+      document.getElementById("nextBtn").disabled = SPECIES.length === 0;
+    }
+
+    document.addEventListener("keydown", (e) => {
+      switch (e.key) {
+        case "ArrowLeft":
+          prevSpecies();
+          break;
+        case "ArrowRight":
+          nextSpecies();
+          break;
+        case " ":
+          e.preventDefault();
+          togglePlay();
+          break;
+      }
+    });
+
+    populateFilters();
+    document.getElementById("speciesCount").textContent = String(SPECIES.length);
+    applyFilters();
+  </script>
+</body>
+</html>

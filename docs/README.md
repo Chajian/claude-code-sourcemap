@@ -28,6 +28,9 @@
 ## 配套材料
 
 - [项目架构图](claude-code-architecture.drawio)
+- Buddy 专栏与图鉴
+- [Buddy 指令专栏](buddy-command-column.html)
+- [Buddy 外观图鉴](buddy-appearance-gallery.html)
 
 ## 建议先看的源码目录
 

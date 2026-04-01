@@ -9,7 +9,7 @@ import { applySettingsChange } from '../utils/settings/applySettingsChange.js';
 import type { SettingSource } from '../utils/settings/constants.js';
 import { createStore } from './store.js';
 
-// DCE: voice context is ant-only. External builds get a passthrough.
+// DCE：语音上下文仅限 ant。外部构建使用直通实现。
 /* eslint-disable @typescript-eslint/no-require-imports */
 const VoiceProvider: (props: {
   children: React.ReactNode;
@@ -20,9 +20,9 @@ const VoiceProvider: (props: {
 /* eslint-enable @typescript-eslint/no-require-imports */
 import { type AppState, type AppStateStore, getDefaultAppState } from './AppStateStore.js';
 
-// TODO: Remove these re-exports once all callers import directly from
-// ./AppStateStore.js. Kept for back-compat during migration so .ts callers
-// can incrementally move off the .tsx import and stop pulling React.
+// TODO：等所有调用方都直接从
+// ./AppStateStore.js 导入后移除这些重新导出。为迁移期间的向后兼容而保留，
+// 这样 .ts 调用方可以逐步不再使用 .tsx 的导入并避免拉入 React。
 export { type AppState, type AppStateStore, type CompletionBoundary, getDefaultAppState, IDLE_SPECULATION_STATE, type SpeculationResult, type SpeculationState } from './AppStateStore.js';
 export const AppStoreContext = React.createContext<AppStateStore | null>(null);
 type Props = {
@@ -124,17 +124,17 @@ function useAppStore(): AppStateStore {
 }
 
 /**
- * Subscribe to a slice of AppState. Only re-renders when the selected value
- * changes (compared via Object.is).
+ * 订阅 AppState 的一个切片。只有当选中的值发生变化时才会重新渲染
+ * （通过 Object.is 比较）。
  *
- * For multiple independent fields, call the hook multiple times:
+ * 对于多个相互独立的字段，多次调用该 Hook：
  * ```
  * const verbose = useAppState(s => s.verbose)
  * const model = useAppState(s => s.mainLoopModel)
  * ```
  *
- * Do NOT return new objects from the selector -- Object.is will always see
- * them as changed. Instead, select an existing sub-object reference:
+ * 不要在 selector 中返回新对象——Object.is 会始终将其视为已变化。
+ * 应选择已有的子对象引用：
  * ```
  * const { text, promptId } = useAppState(s => s.promptSuggestion) // good
  * ```
@@ -163,16 +163,15 @@ export function useAppState(selector) {
 }
 
 /**
- * Get the setAppState updater without subscribing to any state.
- * Returns a stable reference that never changes -- components using only
- * this hook will never re-render from state changes.
+ * 获取 setAppState 的更新函数，而不订阅任何状态。
+ * 返回一个永不改变的稳定引用——只使用该 Hook 的组件不会因状态变化而重新渲染。
  */
 export function useSetAppState() {
   return useAppStore().setState;
 }
 
 /**
- * Get the store directly (for passing getState/setState to non-React code).
+ * 直接获取 store（用于将 getState/setState 传给非 React 代码）。
  */
 export function useAppStateStore() {
   return useAppStore();
@@ -180,8 +179,8 @@ export function useAppStateStore() {
 const NOOP_SUBSCRIBE = () => () => {};
 
 /**
- * Safe version of useAppState that returns undefined if called outside of AppStateProvider.
- * Useful for components that may be rendered in contexts where AppStateProvider isn't available.
+ * useAppState 的安全版本：在 AppStateProvider 外调用时返回 undefined。
+ * 适用于可能在没有 AppStateProvider 的上下文中渲染的组件。
  */
 export function useAppStateMaybeOutsideOfProvider(selector) {
   const $ = _c(3);
