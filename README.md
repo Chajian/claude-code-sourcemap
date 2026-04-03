@@ -104,3 +104,7 @@ Recommended release inputs:
 - `tag`: a version-like tag such as `v2.1.88`
 - `release_name`: a readable title such as `claude-code-sourcemap v2.1.88`
 - `prerelease`: set to `true` only for preview snapshots
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=Chajian/claude-code-sourcemap&type=Date)](https://www.star-history.com/#Chajian/claude-code-sourcemap&Date)
