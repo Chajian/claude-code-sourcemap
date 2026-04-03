@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code Fun Features Gallery - Claude Code Sourcemap</title>
+  <style>
+    :root {
+      --bg: #eef4f8;
+      --panel: rgba(255, 255, 255, 0.9);
+      --border: rgba(203, 213, 225, 0.9);
+      --text: #16202a;
+      --muted: #52606d;
+      --blue: #2563eb;
+      --cyan: #06b6d4;
+      --green: #10b981;
+      --amber: #f59e0b;
+      --pink: #ec4899;
+      --purple: #7c3aed;
+      --shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.10), transparent 24%),
+        radial-gradient(circle at top right, rgba(245, 158, 11, 0.10), transparent 26%),
+        linear-gradient(180deg, #f7fbff 0%, var(--bg) 100%);
+    }
+
+    .page { max-width: 1480px; margin: 0 auto; padding: 24px; }
+    .hero, .panel, .card, .spotlight { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); backdrop-filter: blur(10px); }
+
+    .hero { padding: 30px; margin-bottom: 18px; position: relative; overflow: hidden; }
+    .hero::after { content: ""; position: absolute; width: 240px; height: 240px; right: -72px; top: -72px; border-radius: 50%; background: radial-gradient(circle, rgba(37, 99, 235, 0.18), transparent 66%); }
+    .eyebrow { display: inline-flex; padding: 7px 14px; border-radius: 999px; font-size: 13px; color: var(--muted); background: rgba(37, 99, 235, 0.1); }
+    .title { margin: 16px 0 12px; font-size: clamp(34px, 6vw, 60px); line-height: 1.02; letter-spacing: -0.04em; background: linear-gradient(135deg, #246bff 0%, #00b8d9 48%, #ff7a18 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero p { max-width: 980px; color: var(--muted); font-size: 16px; line-height: 1.78; }
+    .hero-grid { margin-top: 22px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+    .summary { min-height: 110px; padding: 16px; border-radius: 18px; border: 1px solid var(--border); background: rgba(255, 255, 255, 0.82); }
+    .summary .label { color: var(--muted); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
+    .summary strong { display: block; margin: 10px 0 8px; font-size: 28px; line-height: 1; }
+    .summary p { font-size: 13px; line-height: 1.6; }
+
+    .controls, .layout { display: grid; gap: 18px; }
+    .controls { grid-template-columns: 1.25fr 0.75fr; margin-bottom: 18px; }
+    .layout { grid-template-columns: 0.9fr 1.1fr; align-items: start; }
+    .panel, .spotlight { padding: 18px; }
+    .panel h3 { font-size: 15px; margin-bottom: 12px; }
+    .button-row { display: flex; flex-wrap: wrap; gap: 10px; }
+    .filter-btn { border: 1px solid rgba(148, 163, 184, 0.35); background: rgba(255, 255, 255, 0.86); color: var(--muted); border-radius: 999px; padding: 10px 14px; font-size: 13px; cursor: pointer; transition: transform 0.18s ease, box-shadow 0.18s ease; }
+    .filter-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 18px rgba(15, 23, 42, 0.08); }
+    .filter-btn.active { color: #fff; border-color: transparent; background: linear-gradient(135deg, var(--blue), var(--cyan)); }
+
+    .spotlight { position: sticky; top: 18px; }
+    .tag-row, .mini-tag-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tag, .mini-tag { display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; padding: 6px 10px; font-size: 12px; white-space: nowrap; }
+    .tag.command { background: rgba(37, 99, 235, 0.12); color: #1d4ed8; }
+    .tag.category { background: rgba(16, 185, 129, 0.12); color: #047857; }
+    .tag.live { background: rgba(16, 185, 129, 0.12); color: #047857; }
+    .tag.gated { background: rgba(245, 158, 11, 0.14); color: #b45309; }
+    .tag.partial { background: rgba(236, 72, 153, 0.12); color: #be185d; }
+    .tag.internal { background: rgba(124, 58, 237, 0.12); color: #6d28d9; }
+    .tag.fun { background: rgba(15, 23, 42, 0.08); color: #475569; }
+    .tag.access { background: rgba(6, 182, 212, 0.12); color: #0f766e; }
+
+    .spotlight-title { font-size: 34px; line-height: 1.04; margin: 12px 0 10px; }
+    .spotlight-subtitle { font-size: 15px; line-height: 1.7; color: var(--muted); margin-bottom: 16px; }
+    .artifact { min-height: 240px; display: flex; align-items: center; justify-content: center; border-radius: 20px; overflow: hidden; background: radial-gradient(circle at top left, rgba(59,130,246,.18), transparent 26%), radial-gradient(circle at bottom right, rgba(236,72,153,.14), transparent 24%), #0f172a; color: #e2e8f0; margin-bottom: 16px; padding: 20px; }
+    .artifact pre, .mini-artifact pre { margin: 0; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre; }
+    .artifact pre { font-size: 15px; line-height: 1.15; }
+    .waveform { display: flex; gap: 7px; align-items: end; height: 110px; }
+    .waveform span { width: 14px; border-radius: 10px 10px 4px 4px; background: linear-gradient(180deg, #67e8f9, #2563eb); animation: pulse 1.35s ease-in-out infinite; }
+    .waveform span:nth-child(2n) { animation-delay: 0.12s; }
+    .waveform span:nth-child(3n) { animation-delay: 0.22s; }
+    @keyframes pulse { 0%, 100% { transform: scaleY(0.66); opacity: 0.72; } 50% { transform: scaleY(1); opacity: 1; } }
+    .grid-qr { display: grid; grid-template-columns: repeat(4, 22px); gap: 5px; }
+    .grid-qr span { width: 22px; height: 22px; border-radius: 5px; background: rgba(255,255,255,0.1); }
+    .grid-qr .on { background: linear-gradient(135deg, #f8fafc, #38bdf8); }
+    .keys { display: grid; grid-template-columns: repeat(3, 52px); gap: 10px; justify-items: center; align-items: center; }
+    .key { width: 52px; height: 42px; border-radius: 12px; background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(148,163,184,.12)); border: 1px solid rgba(148,163,184,.32); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; }
+    .key.esc { background: linear-gradient(180deg, rgba(37,99,235,.4), rgba(6,182,212,.25)); border-color: rgba(96,165,250,.5); }
+    .browser-window { width: min(100%, 340px); border-radius: 18px; overflow: hidden; border: 1px solid rgba(148,163,184,.22); background: #f8fafc; color: #0f172a; }
+    .browser-bar { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: #e2e8f0; border-bottom: 1px solid #cbd5e1; font-size: 12px; color: #475569; }
+    .browser-chip { flex: 1; padding: 7px 10px; background: #fff; border-radius: 999px; border: 1px solid #cbd5e1; font-size: 12px; }
+    .browser-main { padding: 14px; display: grid; gap: 10px; }
+    .block { border-radius: 12px; background: #fff; border: 1px solid #dbe3ee; padding: 12px; }
+    .block strong { display: block; margin-bottom: 6px; font-size: 13px; }
+    .block p { color: #64748b; font-size: 12px; line-height: 1.6; }
+
+    .metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .metric { padding: 14px; border-radius: 18px; background: rgba(255,255,255,.82); border: 1px solid var(--border); }
+    .metric .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+    .metric strong { font-size: 18px; line-height: 1.35; }
+    .metric p { margin-top: 8px; font-size: 13px; line-height: 1.65; color: var(--muted); }
+    .source-list { display: grid; gap: 8px; }
+    .source-item { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; line-height: 1.55; color: #cbd5e1; background: rgba(15, 23, 42, 0.86); border-radius: 12px; padding: 10px 12px; overflow: hidden; }
+
+    .gallery { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .card { cursor: pointer; overflow: hidden; transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease; }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 22px 42px rgba(15, 23, 42, 0.14); }
+    .card.active { border-color: rgba(37, 99, 235, 0.46); box-shadow: 0 24px 44px rgba(37, 99, 235, 0.16); }
+    .card-head { display: flex; justify-content: space-between; gap: 12px; padding: 16px 16px 0; align-items: start; }
+    .card-body { padding: 0 16px 16px; }
+    .card-title { font-size: 22px; margin-top: 8px; line-height: 1.08; }
+    .card-summary { color: var(--muted); font-size: 14px; line-height: 1.7; margin: 10px 0 12px; }
+    .mini-artifact { margin: 12px 0; min-height: 120px; border-radius: 18px; overflow: hidden; background: #0f172a; display: flex; align-items: center; justify-content: center; color: #e2e8f0; padding: 14px; }
+    .mini-artifact pre { font-size: 11px; line-height: 1.12; }
+    .card-footer { display: flex; justify-content: space-between; gap: 12px; align-items: center; font-size: 13px; color: var(--muted); }
+    .footer-note { margin-top: 18px; padding: 16px 18px; border-radius: 18px; background: rgba(255,255,255,.74); border: 1px solid var(--border); color: var(--muted); font-size: 13px; line-height: 1.8; }
+
+    @media (max-width: 1180px) {
+      .controls, .layout, .hero-grid, .gallery, .metrics { grid-template-columns: 1fr; }
+      .spotlight { position: static; }
+    }
+
+    @media (max-width: 720px) {
+      .page { padding: 14px; }
+      .hero, .panel, .card, .spotlight { border-radius: 18px; }
+      .hero { padding: 22px; }
+      .spotlight-title { font-size: 28px; }
+      .card-title { font-size: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="hero">
+      <div class="eyebrow">single-file interactive HTML · exhibit mode</div>
+      <h1 class="title">Claude Code Fun Features Gallery</h1>
+      <p>
+        This page is not a full command index. It is a curated exhibit for the most playful, product-y, delightful, or boundary-pushing features visible in this repository.
+        The goal is simple: highlight the things that feel fun to poke at, not just useful to execute.
+      </p>
+      <div class="hero-grid">
+        <div class="summary"><div class="label">exhibits</div><strong id="summaryCount">0</strong><p>Curated from commands, docs, and the buddy subsystem.</p></div>
+        <div class="summary"><div class="label">gated items</div><strong id="summaryGated">0</strong><p>Feature flags, claude.ai, plugin flows, or internal gates.</p></div>
+        <div class="summary"><div class="label">easy to try</div><strong id="summaryOpen">0</strong><p>Closer to open-and-play experiences.</p></div>
+        <div class="summary"><div class="label">gallery style</div><strong>Option A</strong><p>Big cards, exhibit mood, playful framing, source evidence preserved.</p></div>
+      </div>
+    </section>
+
+    <section class="controls">
+      <div class="panel"><h3>Filter by category</h3><div class="button-row" id="categoryFilters"></div></div>
+      <div class="panel"><h3>Filter by access</h3><div class="button-row" id="gateFilters"></div></div>
+    </section>
+
+    <section class="layout">
+      <section class="spotlight" id="spotlight"></section>
+      <div>
+        <section class="gallery" id="gallery"></section>
+        <div class="footer-note">
+          "Fun" here does not mean "most important". Some items are delight layers like <code>/buddy</code> or <code>/stickers</code>, some are cross-surface handoffs like
+          <code>/mobile</code> and <code>/desktop</code>, and some are product experiments such as <code>/advisor</code> and <code>/ultraplan</code>.
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const categoryLabels = {
+      all: "All exhibits",
+      companion: "Companion / personality",
+      input: "Input / editing feel",
+      handoff: "Cross-surface handoff",
+      browser: "Browser bridge",
+      remote: "Remote / bridge",
+      delight: "Delight",
+      experimental: "Experimental"
+    };
+
+    const gateLabels = { all: "All access", open: "Easy to try", gated: "Has gates" };
+
+    const entries = [
+      { id: "buddy", title: "Buddy", command: "/buddy", category: "companion", state: "partial", access: "gated", fun: 5, summary: "A full companion subsystem with species, rarity, hats, eyes, shiny rolls, teaser UI, and a persistent sprite in the REPL.", why: "It turns a coding CLI into something with pet energy.", feel: "This is the most gallery-worthy item in the repo.", accessText: "Needs the BUDDY feature; command internals are not fully restored here, but the subsystem wiring is visible.", sources: ["docs/buddy-command-column.html", "docs/buddy-appearance-gallery.html", "restored-src/src/buddy/companion.ts", "restored-src/src/buddy/types.ts", "restored-src/src/buddy/useBuddyNotification.tsx", "restored-src/src/screens/REPL.tsx"] },
+      { id: "think-back", title: "Think Back", command: "/think-back", category: "companion", state: "gated", access: "gated", fun: 5, summary: "A 2025 Year in Review animation flow with install, play, edit, fix, and regenerate options.", why: "It is pure product delight, not raw utility.", feel: "Feels like an annual easter egg with its own plugin lifecycle.", accessText: "GrowthBook gated and tied to a plugin flow.", sources: ["restored-src/src/commands/thinkback/index.ts", "restored-src/src/commands/thinkback/thinkback.tsx", "restored-src/src/commands/thinkback-play/thinkback-play.ts"] },
+      { id: "voice", title: "Voice Mode", command: "/voice", category: "input", state: "gated", access: "gated", fun: 4, summary: "Hold a key to record speech and feed live voice dictation into the CLI.", why: "It shifts the tool from keyboard-only to assistant-like input.", feel: "Strong interaction energy, even without flashy visuals.", accessText: "Needs claude.ai auth, VOICE_MODE gate, audio dependencies, and microphone permission.", sources: ["restored-src/src/commands/voice/index.ts", "restored-src/src/commands/voice/voice.ts", "restored-src/src/hooks/useVoiceIntegration.tsx", "restored-src/src/voice/voiceModeEnabled.ts"] },
+      { id: "theme", title: "Theme Picker", command: "/theme", category: "input", state: "live", access: "open", fun: 3, summary: "A local JSX theme picker dedicated to changing the CLI mood.", why: "It is not more power; it is more personality.", feel: "Small, but very easy to click for fun.", accessText: "Open by default.", sources: ["restored-src/src/commands/theme/index.ts", "restored-src/src/commands/theme/theme.tsx"] },
+      { id: "vim", title: "Vim Mode", command: "/vim", category: "input", state: "live", access: "open", fun: 3, summary: "A modal editing toggle that changes the entire typing feel.", why: "The fun here comes from muscle memory, not visuals.", feel: "Geeky rather than flashy.", accessText: "Open by default.", sources: ["restored-src/src/commands/vim/index.ts", "restored-src/src/commands/vim/vim.ts"] },
+      { id: "mobile", title: "Mobile QR Handoff", command: "/mobile", category: "handoff", state: "live", access: "open", fun: 3, summary: "Shows an iOS or Android QR code directly in the terminal.", why: "A CLI that prints QR handoff UX is already product-minded.", feel: "Quietly impressive the first time you see it.", accessText: "Open by default.", sources: ["restored-src/src/commands/mobile/index.ts", "restored-src/src/commands/mobile/mobile.tsx"] },
+      { id: "desktop", title: "Desktop Handoff", command: "/desktop", category: "handoff", state: "gated", access: "gated", fun: 3, summary: "Continue the current session in Claude Desktop.", why: "It makes Claude Code feel like one surface inside a larger product system.", feel: "Less toy, more polished handoff.", accessText: "Requires claude.ai and supported desktop platforms.", sources: ["restored-src/src/commands/desktop/index.ts", "restored-src/src/commands/desktop/desktop.tsx", "restored-src/src/components/DesktopHandoff.js"] },
+      { id: "chrome", title: "Claude in Chrome", command: "/chrome", category: "browser", state: "gated", access: "gated", fun: 4, summary: "Connects Claude Code to a Chrome extension for navigation, forms, screenshots, GIFs, console logs, and network requests.", why: "This is where the CLI starts reaching into the browser.", feel: "More boundary-expanding than cute.", accessText: "Needs claude.ai subscription, extension install, and permissions.", sources: ["restored-src/src/commands/chrome/index.ts", "restored-src/src/commands/chrome/chrome.tsx", "restored-src/src/skills/bundled/claudeInChrome.ts", "restored-src/src/utils/claudeInChrome/common.js"] },
+      { id: "remote-control", title: "Remote Control", command: "/remote-control", category: "remote", state: "gated", access: "gated", fun: 4, summary: "Turns the local CLI into a remote-controlled endpoint for other Claude surfaces.", why: "This feels like giving your terminal a control socket.", feel: "Very strong systems-toy energy.", accessText: "Needs BRIDGE_MODE and entitlement gates.", sources: ["restored-src/src/commands/bridge/index.ts", "restored-src/src/entrypoints/cli.tsx", "restored-src/src/state/AppStateStore.ts", "restored-src/src/main.tsx"] },
+      { id: "ultraplan", title: "Ultraplan", command: "/ultraplan", category: "experimental", state: "internal", access: "gated", fun: 4, summary: "Pushes advanced plan mode into Claude Code on the web, then polls for approval and execution.", why: "It is a product experiment about where the agent should run and how plans should return.", feel: "Future-facing rather than cute.", accessText: "Internal or heavily gated in the external build.", sources: ["restored-src/src/commands/ultraplan.tsx", "restored-src/src/utils/ultraplan/ccrSession.ts", "restored-src/src/utils/teleport.ts"] },
+      { id: "advisor", title: "Advisor Model", command: "/advisor", category: "experimental", state: "gated", access: "gated", fun: 3, summary: "Adds a server-side advisor model behind the main loop.", why: "It hints at multi-model collaboration inside one CLI.", feel: "Interesting for systems people more than general users.", accessText: "Depends on entitlement and model support.", sources: ["restored-src/src/commands/advisor.ts", "restored-src/src/utils/advisor.js", "restored-src/src/main.tsx"] },
+      { id: "stickers", title: "Stickers", command: "/stickers", category: "delight", state: "live", access: "open", fun: 4, summary: "A command that exists just to open a sticker page.", why: "This is delight with almost zero shame.", feel: "Tiny, but immediately charming.", accessText: "Open by default.", sources: ["restored-src/src/commands/stickers/index.ts", "restored-src/src/commands/stickers/stickers.ts"] }
+    ];
+
+    let currentCategory = "all";
+    let currentGate = "all";
+    let selectedId = "buddy";
+
+    function stars(n) { return "★".repeat(n) + "☆".repeat(5 - n); }
+
+    function artifact(entry, compact) {
+      if (entry.id === "buddy") return compact ? "<pre>  /\\\\_/\\\\\n ( o.o )\n  > ^ <\nlegendary?</pre>" : "<pre>   /\\\\_/\\\\\n  ( o.o )   hat: wizard\n   > ^ <    shiny: 1%\n\nspecies: 18\nrarity: common -> legendary\ncompanion: persistent</pre>";
+      if (entry.id === "voice") return "<div><div class='waveform'><span style='height:34px'></span><span style='height:72px'></span><span style='height:54px'></span><span style='height:92px'></span><span style='height:44px'></span><span style='height:100px'></span><span style='height:60px'></span><span style='height:86px'></span></div></div>";
+      if (entry.id === "think-back") return compact ? "<pre>2025\nYEAR\nIN\nREVIEW</pre>" : "<pre>Claude Code\n2025\nYear in Review\n\nplay · edit · fix · regenerate</pre>";
+      if (entry.id === "theme") return "<div style='display:grid;grid-template-columns:repeat(3,56px);gap:10px;'><span style='display:block;width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#2563eb,#06b6d4)'></span><span style='display:block;width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#f59e0b,#ef4444)'></span><span style='display:block;width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#10b981,#14b8a6)'></span><span style='display:block;width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#7c3aed,#ec4899)'></span><span style='display:block;width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#0f172a,#475569)'></span><span style='display:block;width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#e2e8f0,#94a3b8)'></span></div>";
+      if (entry.id === "vim") return "<div><div class='keys'><div></div><div class='key'>K</div><div></div><div class='key'>H</div><div class='key esc'>ESC</div><div class='key'>L</div></div></div>";
+      if (entry.id === "mobile") return "<div class='grid-qr'><span class='on'></span><span class='on'></span><span></span><span></span><span class='on'></span><span class='on'></span><span></span><span class='on'></span><span></span><span></span><span class='on'></span><span class='on'></span><span class='on'></span><span></span><span class='on'></span><span></span></div>";
+      if (entry.id === "desktop") return "<div class='browser-window'><div class='browser-bar'>Claude Desktop · session handoff</div><div class='browser-main'><div class='block'><strong>Current session</strong><p>Continue this CLI conversation in a desktop shell.</p></div><div class='block'><strong>Platform gate</strong><p>macOS / Windows x64 + claude.ai</p></div></div></div>";
+      if (entry.id === "chrome") return "<div class='browser-window'><div class='browser-bar'><span class='browser-chip'>claude.ai/chrome</span></div><div class='browser-main'><div class='block'><strong>Browser tools</strong><p>navigate · forms · screenshots · GIF · console · network</p></div><div class='block'><strong>Needs extension</strong><p>permission setup + reconnect flow</p></div></div></div>";
+      if (entry.id === "remote-control") return compact ? "<pre>phone/web\n   ||\nbridge\n   ||\nlocal CLI</pre>" : "<pre>claude.ai/code\n   || remote-control\n   ||\nlocal terminal session\n\nthis CLI becomes a controlled endpoint</pre>";
+      if (entry.id === "ultraplan") return compact ? "<pre>local idea\n  -> web plan\n  -> approve\n  -> execute</pre>" : "<pre>draft locally\nsend to web\napprove plan mode exit\nexecute remote or return plan</pre>";
+      if (entry.id === "advisor") return compact ? "<pre>main model\n   +\nadvisor</pre>" : "<pre>main loop model\n      |\n server-side advisor\n\nmulti-model collaboration hint</pre>";
+      return "<div style='display:flex;gap:10px;flex-wrap:wrap;justify-content:center;'><span class='tag command'>Claude</span><span class='tag category'>Code</span><span class='tag fun'>Sticker</span><span class='tag access'>Mule</span></div>";
+    }
+
+    function visibleEntries() {
+      return entries.filter(entry => (currentCategory === "all" || entry.category === currentCategory) && (currentGate === "all" || entry.access === currentGate));
+    }
+
+    function syncSelection() {
+      const visible = visibleEntries();
+      if (!visible.some(entry => entry.id === selectedId) && visible.length) selectedId = visible[0].id;
+    }
+
+    function renderButtons(containerId, labels, current, handler) {
+      document.getElementById(containerId).innerHTML = Object.entries(labels).map(([value, label]) => `<button class="filter-btn ${current === value ? "active" : ""}" onclick="${handler}('${value}')">${label}</button>`).join("");
+    }
+
+    function setCategory(value) { currentCategory = value; syncSelection(); render(); }
+    function setGate(value) { currentGate = value; syncSelection(); render(); }
+    function selectEntry(id) { selectedId = id; renderSpotlight(); renderGallery(); }
+
+    function renderSummary() {
+      document.getElementById("summaryCount").textContent = String(entries.length);
+      document.getElementById("summaryGated").textContent = String(entries.filter(entry => entry.access === "gated").length);
+      document.getElementById("summaryOpen").textContent = String(entries.filter(entry => entry.access === "open").length);
+    }
+
+    function renderSpotlight() {
+      const entry = entries.find(item => item.id === selectedId) || entries[0];
+      document.getElementById("spotlight").innerHTML = `
+        <div class="tag-row">
+          <span class="tag command">${entry.command}</span>
+          <span class="tag category">${categoryLabels[entry.category]}</span>
+          <span class="tag ${entry.state}">${entry.state}</span>
+          <span class="tag access">${entry.access === "open" ? "easy to try" : "has gates"}</span>
+          <span class="tag fun">fun ${stars(entry.fun)}</span>
+        </div>
+        <h2 class="spotlight-title">${entry.title}</h2>
+        <p class="spotlight-subtitle">${entry.summary}</p>
+        <div class="artifact">${artifact(entry, false)}</div>
+        <div class="metrics">
+          <div class="metric"><div class="label">why it stands out</div><strong>${entry.why}</strong></div>
+          <div class="metric"><div class="label">gallery read</div><strong>${entry.feel}</strong></div>
+          <div class="metric"><div class="label">access note</div><p>${entry.accessText}</p></div>
+          <div class="metric"><div class="label">what to inspect</div><p>Command entry, product flavor, gates, and the source anchors that prove it exists.</p></div>
+        </div>
+        <div class="source-list">${entry.sources.map(source => `<div class="source-item">${source}</div>`).join("")}</div>
+      `;
+    }
+
+    function renderGallery() {
+      const visible = visibleEntries();
+      document.getElementById("gallery").innerHTML = visible.map(entry => `
+        <article class="card ${entry.id === selectedId ? "active" : ""}" onclick="selectEntry('${entry.id}')">
+          <div class="card-head">
+            <div>
+              <div class="mini-tag-row">
+                <span class="mini-tag tag command">${entry.command}</span>
+                <span class="mini-tag tag ${entry.state}">${entry.state}</span>
+              </div>
+              <h3 class="card-title">${entry.title}</h3>
+            </div>
+            <span class="mini-tag tag fun">${stars(entry.fun)}</span>
+          </div>
+          <div class="card-body">
+            <div class="card-summary">${entry.summary}</div>
+            <div class="mini-artifact">${artifact(entry, true)}</div>
+            <div class="card-footer">
+              <span>${categoryLabels[entry.category]}</span>
+              <span>${entry.access === "open" ? "easy to try" : "has gates"}</span>
+            </div>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function render() {
+      renderSummary();
+      renderButtons("categoryFilters", categoryLabels, currentCategory, "setCategory");
+      renderButtons("gateFilters", gateLabels, currentGate, "setGate");
+      renderSpotlight();
+      renderGallery();
+    }
+
+    render();
+  </script>
+</body>
+</html>
