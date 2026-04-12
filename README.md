@@ -2,13 +2,14 @@
 
 [![linux.do](https://img.shields.io/badge/linux.do-huo0-blue?logo=linux&logoColor=white)](https://linux.do)
 
-[学习总目录](docs/README.md) | [14 天学习计划](docs/day-01-learning-plan.md) | [架构图](docs/claude-code-architecture.drawio) | [源码主目录](restored-src/src/) | [提取脚本](extract-sources.js)
+[文档中心](docs/README.md) | [维护者手册](docs/maintainers/README.md) | [学习档案](docs/archive/learning-path/README.md) | [架构图](docs/assets/architecture/claude-code-architecture.drawio) | [源码主目录](restored-src/src/) | [提取脚本](extract-sources.js)
 
 ## 快速开始
 
-- 想快速了解这个仓库：先看 [学习总目录](docs/README.md)
-- 想按路径系统学习：从 [第 1 天学习文档](docs/day-01-learning-plan.md) 开始
-- 想先看整体结构：打开 [项目架构图](docs/claude-code-architecture.drawio)
+- 想快速了解当前文档结构：先看 [文档中心](docs/README.md)
+- 想维护或二开这个仓库：先看 [维护者手册](docs/maintainers/README.md)
+- 想沿着旧学习路径阅读：进入 [学习档案](docs/archive/learning-path/README.md)
+- 想先看整体结构：打开 [架构图](docs/assets/architecture/claude-code-architecture.drawio)
 - 想直接读源码：进入 [restored-src/src/](restored-src/src/)
 
 > [!WARNING]
@@ -35,20 +36,21 @@
 - 还原方式：提取 `cli.js.map` 中的 `sourcesContent`
 - 仓库性质：研究与学习导向，不是官方开发仓库
 
-## 学习入口
+## 文档入口
 
-学习资料从这里开始：
+当前建议从这些入口进入：
 
-- [学习总目录](docs/README.md)
-- [14 天学习计划 - 第 1 天](docs/day-01-learning-plan.md)
-- [14 天学习计划 - 第 14 天](docs/day-14-learning-plan.md)
-- [项目架构图](docs/claude-code-architecture.drawio)
+- [文档中心](docs/README.md)
+- [维护者手册](docs/maintainers/README.md)
+- [学习档案](docs/archive/learning-path/README.md)
+- [架构图](docs/assets/architecture/claude-code-architecture.drawio)
 
 推荐阅读顺序：
 
-1. 先看 [学习总目录](docs/README.md)
-2. 再按 `day-01` 到 `day-14` 顺序阅读
-3. 阅读过程中只把源码主目录锁定在 `restored-src/src/`
+1. 先看 [文档中心](docs/README.md)
+2. 如果目标是维护或二开，再看 [维护者手册](docs/maintainers/README.md)
+3. 如果目标是补背景学习，再看 [学习档案](docs/archive/learning-path/README.md)
+4. 阅读过程中把源码主目录锁定在 `restored-src/src/`
 
 ## 推荐学习主线
 

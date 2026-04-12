@@ -51,7 +51,9 @@
 
 正确示例：
 
-- `docs/day-01-learning-plan.md`
+- `docs/maintainers/architecture-overview.md`
+- `docs/archive/learning-path/day-01.md`
+- `docs/assets/architecture/claude-code-architecture.drawio`
 - `restored-src/src/query.ts`
 - `../restored-src/src/`
 
@@ -96,26 +98,16 @@
 
 ## 推荐目录约定
 
-如果继续补学习资料，建议沿用下面的目录组织：
+如果继续补文档资料，建议沿用下面的目录组织：
 
 ```text
 docs/
   README.md
-  day-01-learning-plan.md
-  ...
-  day-14-learning-plan.md
-  claude-code-architecture.drawio
-```
-
-如果后续资料变多，可以继续扩展为：
-
-```text
-docs/
-  guides/          专题导读
-  architecture/    架构图与说明
-  glossary/        术语表
-  modules/         模块级学习笔记
-  faq/             常见问题
+  maintainers/
+  flows/
+  topics/
+  assets/
+  archive/
 ```
 
 ## 新文档建议模板

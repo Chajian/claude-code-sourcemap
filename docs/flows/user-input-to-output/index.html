@@ -724,10 +724,10 @@
         io: "输入是用户键入的 prompt、引用文件、粘贴内容或以 /、! 等模式字符触发的命令型输入；输出是一次可提交的用户意图对象。",
         moduleText: "这里的重点不是渲染界面，而是形成统一提交入口。REPL 汇总当前消息、输入模式、引用、工作区状态，然后调用 handlePromptSubmit 继续后面的链路。",
         refs: [
-          { label: "screens/REPL.tsx", href: "../restored-src/src/screens/REPL.tsx" },
-          { label: "components/PromptInput", href: "../restored-src/src/components/PromptInput/PromptInput.tsx" },
-          { label: "state/AppState.tsx", href: "../restored-src/src/state/AppState.tsx" },
-          { label: "阶段 1 深入拆解", href: "./stage-1-repl-input-flow.html" }
+          { label: "screens/REPL.tsx", href: "../../../restored-src/src/screens/REPL.tsx" },
+          { label: "components/PromptInput", href: "../../../restored-src/src/components/PromptInput/PromptInput.tsx" },
+          { label: "state/AppState.tsx", href: "../../../restored-src/src/state/AppState.tsx" },
+          { label: "阶段 1 深入拆解", href: "../repl-turn-construction/index.html" }
         ],
         state: [
           "用户文本先被包装成待提交输入，而不是直接发给模型。",
@@ -745,9 +745,9 @@
         io: "输入是前端收集好的用户意图与当前会话状态；输出是规范化后的消息链和一次可执行的 query 调用参数。",
         moduleText: "这一层承担了把 UI 事件翻译成运行时请求的职责。它既要考虑 slash/bash 输入，也要考虑恢复、排队、权限确认和 query 并发保护。",
         refs: [
-          { label: "utils/handlePromptSubmit.ts", href: "../restored-src/src/utils/handlePromptSubmit.ts" },
-          { label: "utils/processUserInput", href: "../restored-src/src/utils/processUserInput" },
-          { label: "utils/QueryGuard.js", href: "../restored-src/src/utils/QueryGuard.js" }
+          { label: "utils/handlePromptSubmit.ts", href: "../../../restored-src/src/utils/handlePromptSubmit.ts" },
+          { label: "utils/processUserInput", href: "../../../restored-src/src/utils/processUserInput" },
+          { label: "utils/QueryGuard.ts", href: "../../../restored-src/src/utils/QueryGuard.ts" }
         ],
         state: [
           "用户文本会被整理为消息对象，并可能附带附件或引用解析结果。",
@@ -765,9 +765,9 @@
         io: "输入是待执行的 queued commands；输出是满足条件后被正式 dispatch 的下一条用户输入。",
         moduleText: "仓库里的输入并不总是即时执行。用户输入、任务通知、系统生成事件都可能进入同一个队列，再按优先级和当前执行状态触发消费。",
         refs: [
-          { label: "hooks/useQueueProcessor.ts", href: "../restored-src/src/hooks/useQueueProcessor.ts" },
-          { label: "utils/messageQueueManager.js", href: "../restored-src/src/utils/messageQueueManager.js" },
-          { label: "utils/queueProcessor.js", href: "../restored-src/src/utils/queueProcessor.js" }
+          { label: "hooks/useQueueProcessor.ts", href: "../../../restored-src/src/hooks/useQueueProcessor.ts" },
+          { label: "utils/messageQueueManager.ts", href: "../../../restored-src/src/utils/messageQueueManager.ts" },
+          { label: "utils/queueProcessor.ts", href: "../../../restored-src/src/utils/queueProcessor.ts" }
         ],
         state: [
           "队列快照通过订阅驱动 REPL 重新渲染。",
@@ -785,9 +785,9 @@
         io: "输入是完整消息链、工具上下文、模型配置与预算参数；输出是流式 assistant 事件、请求开始事件和后续工具调用指令。",
         moduleText: "如果要找用户输入到底什么时候真正进模型，这里就是答案。query 不只是一次 API 调用，它是一个可多轮继续的 async generator。",
         refs: [
-          { label: "query.ts", href: "../restored-src/src/query.ts" },
-          { label: "utils/messages.js", href: "../restored-src/src/utils/messages.js" },
-          { label: "query/config.js", href: "../restored-src/src/query/config.js" }
+          { label: "query.ts", href: "../../../restored-src/src/query.ts" },
+          { label: "utils/messages.ts", href: "../../../restored-src/src/utils/messages.ts" },
+          { label: "query/config.ts", href: "../../../restored-src/src/query/config.ts" }
         ],
         state: [
           "messages 被标准化成 API 可接受的格式。",
@@ -805,9 +805,9 @@
         io: "输入是模型流式返回的 event stream；输出是可显示消息、工具调用请求或继续下一轮的状态转移。",
         moduleText: "这里要把流式输出和最终答案分开理解。REPL 看到的是中间事件流，最终显示结果是这些事件经过消息协议层后逐步累积出来的。",
         refs: [
-          { label: "utils/messages.js", href: "../restored-src/src/utils/messages.js" },
-          { label: "types/message.js", href: "../restored-src/src/types/message.js" },
-          { label: "hooks/useLogMessages.js", href: "../restored-src/src/hooks/useLogMessages.js" }
+          { label: "utils/messages.ts", href: "../../../restored-src/src/utils/messages.ts" },
+          { label: "utils/mailbox.ts", href: "../../../restored-src/src/utils/mailbox.ts" },
+          { label: "hooks/useLogMessages.ts", href: "../../../restored-src/src/hooks/useLogMessages.ts" }
         ],
         state: [
           "assistant 文本片段会流式进入消息列表。",
@@ -825,10 +825,10 @@
         io: "输入是模型发出的 tool_use 指令；输出是本地执行得到的 tool_result、进度消息和可能的权限确认流。",
         moduleText: "这一步是 agentic coding 工具和普通聊天模型的分水岭。模型不是只生成文本，而是在采样过程中主动请求本地能力，工具结果随后还要重新回到消息链里继续推理。",
         refs: [
-          { label: "services/tools/toolOrchestration.ts", href: "../restored-src/src/services/tools/toolOrchestration.ts" },
-          { label: "services/tools/toolExecution.ts", href: "../restored-src/src/services/tools/toolExecution.ts" },
-          { label: "Tool.ts", href: "../restored-src/src/Tool.ts" },
-          { label: "阶段 6 深入拆解", href: "./stage-6-tool-execution-flow.html" }
+          { label: "services/tools/toolOrchestration.ts", href: "../../../restored-src/src/services/tools/toolOrchestration.ts" },
+          { label: "services/tools/toolExecution.ts", href: "../../../restored-src/src/services/tools/toolExecution.ts" },
+          { label: "Tool.ts", href: "../../../restored-src/src/Tool.ts" },
+          { label: "阶段 6 深入拆解", href: "../tool-execution/index.html" }
         ],
         state: [
           "toolUseContext、权限上下文和运行时状态一起参与执行判断。",
@@ -846,9 +846,9 @@
         io: "输入是工具返回的结果块和更新后的消息链；输出是新的 assistant 文本、更多工具调用，或 turn 的终止结果。",
         moduleText: "如果要理解为什么一个请求会多轮往返，看这一段就够了。一次用户提交可能经历多轮 assistant -> tool_use -> tool_result -> assistant 的闭环。",
         refs: [
-          { label: "query.ts", href: "../restored-src/src/query.ts" },
-          { label: "services/tools/StreamingToolExecutor.ts", href: "../restored-src/src/services/tools/StreamingToolExecutor.ts" },
-          { label: "utils/toolResultStorage.ts", href: "../restored-src/src/utils/toolResultStorage.ts" }
+          { label: "query.ts", href: "../../../restored-src/src/query.ts" },
+          { label: "services/tools/StreamingToolExecutor.ts", href: "../../../restored-src/src/services/tools/StreamingToolExecutor.ts" },
+          { label: "utils/toolResultStorage.ts", href: "../../../restored-src/src/utils/toolResultStorage.ts" }
         ],
         state: [
           "messages 队列追加 tool_result 后再次进入模型采样。",
@@ -866,9 +866,9 @@
         io: "输入是本轮产生的用户消息、assistant 消息、工具结果与系统消息；输出是终端中的最终显示结果和可恢复的会话文件。",
         moduleText: "最后看到的不是单纯 print 一行文本。REPL 渲染、会话 JSONL、工具结果存储、恢复指针和统计状态都在这里汇合，形成真正可持续的交互会话。",
         refs: [
-          { label: "utils/sessionStorage.ts", href: "../restored-src/src/utils/sessionStorage.ts" },
-          { label: "hooks/useLogMessages.js", href: "../restored-src/src/hooks/useLogMessages.js" },
-          { label: "screens/REPL.tsx", href: "../restored-src/src/screens/REPL.tsx" }
+          { label: "utils/sessionStorage.ts", href: "../../../restored-src/src/utils/sessionStorage.ts" },
+          { label: "hooks/useLogMessages.ts", href: "../../../restored-src/src/hooks/useLogMessages.ts" },
+          { label: "screens/REPL.tsx", href: "../../../restored-src/src/screens/REPL.tsx" }
         ],
         state: [
           "消息被写入 transcript JSONL，供恢复和重放使用。",

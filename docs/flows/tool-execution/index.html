@@ -580,10 +580,10 @@
       </div>
 
       <div class="hero-actions">
-        <a class="btn btn-primary" href="./user-token-to-output-flow.html">返回主链路</a>
-        <a class="btn btn-secondary" href="../restored-src/src/services/tools/toolOrchestration.ts">toolOrchestration.ts</a>
-        <a class="btn btn-secondary" href="../restored-src/src/services/tools/toolExecution.ts">toolExecution.ts</a>
-        <a class="btn btn-secondary" href="../restored-src/src/Tool.ts">Tool.ts</a>
+        <a class="btn btn-primary" href="../user-input-to-output/index.html">返回主链路</a>
+        <a class="btn btn-secondary" href="../../../restored-src/src/services/tools/toolOrchestration.ts">toolOrchestration.ts</a>
+        <a class="btn btn-secondary" href="../../../restored-src/src/services/tools/toolExecution.ts">toolExecution.ts</a>
+        <a class="btn btn-secondary" href="../../../restored-src/src/Tool.ts">Tool.ts</a>
       </div>
     </section>
 
@@ -607,7 +607,7 @@
             <li>批次间应用上下文修改器（如 cwd 变更）</li>
           </ul>
           <div class="code-links">
-            <a class="code-link" href="../restored-src/src/services/tools/toolOrchestration.ts">toolOrchestration.ts (189 行)</a>
+            <a class="code-link" href="../../../restored-src/src/services/tools/toolOrchestration.ts">toolOrchestration.ts (189 行)</a>
           </div>
         </div>
         <div class="lane lane-exec">
@@ -621,7 +621,7 @@
             <li>错误时走 PostToolUseFailure hooks</li>
           </ul>
           <div class="code-links">
-            <a class="code-link" href="../restored-src/src/services/tools/toolExecution.ts">toolExecution.ts (1745 行)</a>
+            <a class="code-link" href="../../../restored-src/src/services/tools/toolExecution.ts">toolExecution.ts (1745 行)</a>
           </div>
         </div>
         <div class="lane lane-perm">
@@ -635,8 +635,8 @@
             <li>交互层：最终回退到用户确认弹窗</li>
           </ul>
           <div class="code-links">
-            <a class="code-link" href="../restored-src/src/utils/permissions/permissions.ts">permissions.ts</a>
-            <a class="code-link" href="../restored-src/src/types/permissions.ts">permissions types (442 行)</a>
+            <a class="code-link" href="../../../restored-src/src/utils/permissions/permissions.ts">permissions.ts</a>
+            <a class="code-link" href="../../../restored-src/src/types/permissions.ts">permissions types (442 行)</a>
           </div>
         </div>
       </div>
@@ -833,29 +833,29 @@
           <h3>入口 · 编排调度</h3>
           <p><code>runTools()</code> 是 query.ts 调用的唯一入口。它接收所有待执行的 tool_use 块，分批后逐批执行。</p>
           <div class="code-links">
-            <a class="code-link" href="../restored-src/src/services/tools/toolOrchestration.ts">toolOrchestration.ts</a>
-            <a class="code-link" href="../restored-src/src/query.ts">query.ts:1382 (调用点)</a>
+            <a class="code-link" href="../../../restored-src/src/services/tools/toolOrchestration.ts">toolOrchestration.ts</a>
+            <a class="code-link" href="../../../restored-src/src/query.ts">query.ts:1382 (调用点)</a>
           </div>
         </div>
         <div class="code-card">
           <h3>单次执行 · 完整管线</h3>
           <p><code>runToolUse()</code> 走完校验 → Hook → 权限 → 调用 → 后处理的全部路径，是最长的一个函数。</p>
           <div class="code-links">
-            <a class="code-link" href="../restored-src/src/services/tools/toolExecution.ts">toolExecution.ts</a>
+            <a class="code-link" href="../../../restored-src/src/services/tools/toolExecution.ts">toolExecution.ts</a>
           </div>
         </div>
         <div class="code-card">
           <h3>工具定义 · 类型系统</h3>
           <p><code>Tool</code> 类型定义了每个工具必须实现的接口：call、description、inputSchema、checkPermissions 等。</p>
           <div class="code-links">
-            <a class="code-link" href="../restored-src/src/Tool.ts">Tool.ts</a>
+            <a class="code-link" href="../../../restored-src/src/Tool.ts">Tool.ts</a>
           </div>
         </div>
         <div class="code-card">
           <h3>Hooks · 可扩展拦截</h3>
           <p>PreToolUse / PostToolUse / PostToolUseFailure 三类 hook 在执行前后提供完整的拦截和转换能力。</p>
           <div class="code-links">
-            <a class="code-link" href="../restored-src/src/services/tools/toolHooks.ts">toolHooks.ts (651 行)</a>
+            <a class="code-link" href="../../../restored-src/src/services/tools/toolHooks.ts">toolHooks.ts (651 行)</a>
           </div>
         </div>
       </div>

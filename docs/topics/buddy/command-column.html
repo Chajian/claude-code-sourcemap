@@ -529,7 +529,7 @@
         </section>
 
         <section class="card">
-          <h2>和 user-token-to-output-flow 的对应关系</h2>
+          <h2>和 user-input-to-output 的对应关系</h2>
           <div id="mappingBox" class="muted" style="line-height: 1.8;"></div>
         </section>
       </aside>
@@ -551,7 +551,7 @@
           "PromptInput footer 里选中 companion 项时，会直接 onSubmit('/buddy')。"
         ],
         tokenPhase: "还没进入模型，也还没真正进入 query。这里只是把一个隐藏功能做成用户可触达入口。",
-        mapping: "对应 user-token-to-output-flow 的阶段 1，本地 UI 交互层。",
+        mapping: "对应 user-input-to-output 的阶段 1，本地 UI 交互层。",
         files: [
           "restored-src/src/buddy/useBuddyNotification.tsx",
           "restored-src/src/components/PromptInput/PromptInput.tsx"
@@ -610,7 +610,7 @@
           "这意味着 buddy 不只是 UI 装饰，它会影响模型行为边界。"
         ],
         tokenPhase: "这里开始影响真实 prompt 组成，因为 attachment 会进入消息构造。",
-        mapping: "对齐 user-token-to-output-flow 的阶段 4：query 准备 API 消息。",
+        mapping: "对齐 user-input-to-output 的阶段 4：query 准备 API 消息。",
         files: [
           "restored-src/src/buddy/prompt.ts",
           "restored-src/src/utils/attachments.ts",
@@ -672,7 +672,7 @@
         tokenPhase: "单次命令只是一瞬；companion 带来的上下文影响和 UI 驻留才是长期效应。",
         mapping: "这是对整个主图的跨阶段总结。",
         files: [
-          "docs/user-token-to-output-flow.html",
+          "../../flows/user-input-to-output/index.html",
           "restored-src/src/commands.ts",
           "restored-src/src/buddy/prompt.ts"
         ]
